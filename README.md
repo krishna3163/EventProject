@@ -224,4 +224,4 @@ See `.env.example` files in both `EventProject-main/` and `event-frontend/`.
 
 This project is open source and available under the [MIT License](LICENSE).
 
-**Developed with ❤️ and a lot of caffeine by [krishna3163](https://github.com/krishna3163)**
+**Developed with ❤️ and a lot of caffeine by [Team CodeNexus](https://github.com/krishna3163)**
