@@ -44,7 +44,7 @@ const Login = () => {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2">
-                        <label className="text-sm font-bold theme-text-primary ml-1">Email Address</label>
+                        <label className="text-sm font-bold theme-text-primary ml-1">Email or Username</label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,18 +52,23 @@ const Login = () => {
                                 </svg>
                             </div>
                             <input
-                                type="email"
+                                type="text"
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="input-field pl-12"
-                                placeholder="Enter your email"
+                                placeholder="Enter email or 'admin'"
                             />
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-bold theme-text-primary ml-1">Password</label>
+                        <div className="flex justify-between items-center ml-1">
+                            <label className="text-sm font-bold theme-text-primary">Password</label>
+                            <Link to="/forgot-password" size="sm" className="text-xs font-bold text-blue-600 hover:underline">
+                                Forgot Password?
+                            </Link>
+                        </div>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

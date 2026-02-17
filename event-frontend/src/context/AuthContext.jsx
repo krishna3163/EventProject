@@ -64,7 +64,14 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const login = async (email, password) => {
+    const login = async (emailOrUsername, password) => {
+        let email = emailOrUsername;
+
+        // Support 'admin' username for quick access
+        if (emailOrUsername.toLowerCase() === 'admin') {
+            email = 'admin@eventhub.com';
+        }
+
         const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password,
