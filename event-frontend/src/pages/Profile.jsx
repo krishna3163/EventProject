@@ -9,7 +9,7 @@ const Profile = () => {
     const { user, setUser } = useAuth();
     const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
-    const [editData, setEditData] = useState({ ...user });
+    const [editData, setEditData] = useState({});
     const [viewedUser, setViewedUser] = useState(null);
     const [loading, setLoading] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -210,7 +210,10 @@ const Profile = () => {
                                 ) : (
                                     <>
                                         <button
-                                            onClick={() => setIsEditing(true)}
+                                            onClick={() => {
+                                                setEditData({ ...user });
+                                                setIsEditing(true);
+                                            }}
                                             className="flex-1 py-4 bg-gray-800 text-white font-black rounded-2xl shadow-xl hover:bg-gray-900 transition-all active:scale-95"
                                         >
                                             Edit Profile
