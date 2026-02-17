@@ -31,3 +31,20 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Node / React Frontend ###
+event-frontend/node_modules/
+event-frontend/dist/
+
+### Environment / Secrets ###
+.env
+*.env.local
+event-frontend/.env
+
+### OS Files ###
+.DS_Store
+Thumbs.db
+desktop.ini
+
+### Logs ###
+*.log

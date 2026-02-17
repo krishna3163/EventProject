@@ -52,7 +52,7 @@ const EventCard = ({ event, isAdmin, onDelete, isFavorite, onToggleFavorite, vie
 
     if (viewMode === 'list') {
         return (
-            <div className="group relative bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all border border-gray-100 dark:border-gray-700 flex items-center p-4 gap-6 animate-fade-in">
+            <div className="group relative theme-bg-secondary rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all border border-gray-100 flex items-center p-4 gap-6 animate-fade-in">
                 <div className={`w-2 h-24 rounded-full ${isMcq ? 'bg-blue-500' : 'bg-purple-500'}`}></div>
 
                 <div className="flex-grow">
@@ -60,15 +60,15 @@ const EventCard = ({ event, isAdmin, onDelete, isFavorite, onToggleFavorite, vie
                         <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${isMcq ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400'}`}>
                             {type || (isMcq ? 'MCQ' : 'Coding')}
                         </span>
-                        <span className="text-xs text-gray-400 font-medium">{formatDate(startTime)}</span>
+                        <span className="text-xs theme-text-secondary font-medium">{formatDate(startTime)}</span>
                     </div>
-                    <h3 className="text-lg font-bold text-gray-800 dark:text-white group-hover:text-blue-600 transition-colors">{title}</h3>
+                    <h3 className="text-lg font-bold theme-text-primary group-hover:text-blue-600 transition-colors">{title}</h3>
                 </div>
 
                 <div className="flex items-center space-x-4">
                     <button
                         onClick={(e) => { e.preventDefault(); onToggleFavorite && onToggleFavorite(); }}
-                        className={`p-2 rounded-full transition-all ${isFavorite ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-300 hover:text-red-400 hover:bg-gray-50 dark:hover:bg-slate-700'}`}
+                        className={`p-2 rounded-full transition-all ${isFavorite ? 'text-red-500 bg-red-50' : 'theme-text-secondary hover:text-red-400 theme-bg-tertiary'}`}
                     >
                         <svg className="w-6 h-6" fill={isFavorite ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -87,7 +87,7 @@ const EventCard = ({ event, isAdmin, onDelete, isFavorite, onToggleFavorite, vie
     }
 
     return (
-        <div className="group relative bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col h-full transform hover:-translate-y-2">
+        <div className="group relative theme-bg-secondary rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col h-full transform hover:-translate-y-2">
             {/* Visual Header */}
             <div className={`h-32 bg-gradient-to-br ${isMcq ? 'from-blue-600 to-indigo-700' : 'from-purple-600 to-fuchsia-700'} p-6 relative`}>
                 <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-white uppercase tracking-widest border border-white/30">
@@ -117,26 +117,26 @@ const EventCard = ({ event, isAdmin, onDelete, isFavorite, onToggleFavorite, vie
                 <div className="space-y-4 flex-grow">
                     {/* Timeline */}
                     <div className="flex items-start space-x-3">
-                        <div className={`p-2 rounded-lg ${isMcq ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600'}`}>
+                        <div className={`p-2 rounded-lg ${isMcq ? 'theme-bg-tertiary text-blue-600' : 'theme-bg-tertiary text-purple-600'}`}>
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                         </div>
                         <div>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Starts</p>
-                            <p className="text-sm font-bold text-gray-700">{formatDate(startTime)}</p>
+                            <p className="text-[10px] font-black theme-text-secondary uppercase tracking-widest leading-none mb-1">Starts</p>
+                            <p className="text-sm font-bold theme-text-primary">{formatDate(startTime)}</p>
                         </div>
                     </div>
 
                     <div className="flex items-start space-x-3">
-                        <div className={`p-2 rounded-lg ${isMcq ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600'}`}>
+                        <div className={`p-2 rounded-lg ${isMcq ? 'theme-bg-tertiary text-blue-600' : 'theme-bg-tertiary text-purple-600'}`}>
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
                         <div>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Ends</p>
-                            <p className="text-sm font-bold text-gray-700">{formatDate(endTime)}</p>
+                            <p className="text-[10px] font-black theme-text-secondary uppercase tracking-widest leading-none mb-1">Ends</p>
+                            <p className="text-sm font-bold theme-text-primary">{formatDate(endTime)}</p>
                         </div>
                     </div>
                 </div>

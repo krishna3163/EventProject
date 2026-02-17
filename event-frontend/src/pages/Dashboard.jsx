@@ -142,17 +142,17 @@ const Dashboard = () => {
             </div>
 
             {/* Tabs & Search */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                <div className="flex p-1 bg-gray-100 rounded-xl space-x-1 w-full md:w-auto">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 theme-bg-secondary p-4 rounded-2xl shadow-sm border border-gray-100">
+                <div className="flex p-1 theme-bg-tertiary rounded-xl space-x-1 w-full md:w-auto">
                     <button
                         onClick={() => setActiveTab('mcq')}
-                        className={`flex-1 md:flex-none px-6 py-3 rounded-lg font-bold transition-all ${activeTab === 'mcq' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                        className={`flex-1 md:flex-none px-6 py-3 rounded-lg font-bold transition-all ${activeTab === 'mcq' ? 'theme-bg-secondary text-blue-600 shadow-sm' : 'theme-text-secondary hover:theme-text-primary'}`}
                     >
                         MCQ Quizzes ({events.length})
                     </button>
                     <button
                         onClick={() => setActiveTab('coding')}
-                        className={`flex-1 md:flex-none px-6 py-3 rounded-lg font-bold transition-all ${activeTab === 'coding' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                        className={`flex-1 md:flex-none px-6 py-3 rounded-lg font-bold transition-all ${activeTab === 'coding' ? 'theme-bg-secondary text-purple-600 shadow-sm' : 'theme-text-secondary hover:theme-text-primary'}`}
                     >
                         Coding Contests ({contests.length})
                     </button>
@@ -190,14 +190,14 @@ const Dashboard = () => {
                     ))}
                 </div>
             ) : (
-                <div className="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-gray-200">
-                    <div className="bg-gray-100 p-6 rounded-full inline-block mb-6">
+                <div className="text-center py-24 theme-bg-secondary rounded-3xl border-2 border-dashed border-gray-200">
+                    <div className="theme-bg-tertiary p-6 rounded-full inline-block mb-6">
                         <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-800 mb-2">No {activeTab === 'mcq' ? 'quizzes' : 'contests'} found</h3>
-                    <p className="text-gray-500 mb-8">Try adjusting your search or check back later for new events.</p>
+                    <h3 className="text-2xl font-bold theme-text-primary mb-2">No {activeTab === 'mcq' ? 'quizzes' : 'contests'} found</h3>
+                    <p className="theme-text-secondary mb-8">Try adjusting your search or check back later for new events.</p>
                     {isAdmin && (
                         <button
                             onClick={() => navigate('/create')}

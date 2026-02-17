@@ -53,4 +53,40 @@ public class EventController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    // UPDATE EVENT
+    @PutMapping("/updateEvent/{id}")
+    public ResponseEntity<?> updateEvent(@PathVariable String id,
+            @RequestBody Event updatedEvent) {
+        return eventRepository.findById(id)
+                .map(existing -> {
+                    if (updatedEvent.getTitle() != null)
+                        existing.setTitle(updatedEvent.getTitle());
+                    if (updatedEvent.getType() != null)
+                        existing.setType(updatedEvent.getType());
+                    if (updatedEvent.getStartTime() != null)
+                        existing.setStartTime(updatedEvent.getStartTime());
+                    if (updatedEvent.getEndTime() != null)
+                        existing.setEndTime(updatedEvent.getEndTime());
+                    if (updatedEvent.getDurationInMinutes() != null)
+                        existing.setDurationInMinutes(updatedEvent.getDurationInMinutes());
+                    if (updatedEvent.getTotalMarks() != null)
+                        existing.setTotalMarks(updatedEvent.getTotalMarks());
+                    if (updatedEvent.getStatus() != null)
+                        existing.setStatus(updatedEvent.getStatus());
+
+                    return ResponseEntity.ok(eventRepository.save(existing));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // DELETE EVENT
+    @DeleteMapping("/deleteEvent/{id}")
+    public ResponseEntity<?> deleteEvent(@PathVariable String id) {
+        if (!eventRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        eventRepository.deleteById(id);
+        return ResponseEntity.ok().body("Event deleted successfully");
+    }
 }

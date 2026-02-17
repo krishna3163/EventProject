@@ -39,12 +39,12 @@ const Login = () => {
                     <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
                         Welcome Back
                     </h1>
-                    <p className="text-gray-500 font-medium">Please enter your details to sign in</p>
+                    <p className="theme-text-secondary font-medium">Please enter your details to sign in</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-700 ml-1">Username</label>
+                        <label className="text-sm font-bold theme-text-primary ml-1">Username</label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,7 +63,7 @@ const Login = () => {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-700 ml-1">Password</label>
+                        <label className="text-sm font-bold theme-text-primary ml-1">Password</label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -99,7 +99,7 @@ const Login = () => {
                 </form>
 
                 <div className="mt-8 text-center border-t border-gray-100 pt-8">
-                    <p className="text-gray-500 font-medium mb-4">New to EventHub?</p>
+                    <p className="theme-text-secondary font-medium mb-4">New to EventHub?</p>
                     <Link
                         to="/signup"
                         className="inline-flex items-center justify-center w-full py-4 border-2 border-blue-600 text-blue-600 font-bold rounded-2xl hover:bg-blue-50 transition-all active:scale-95 group"

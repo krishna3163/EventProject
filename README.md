@@ -1,96 +1,223 @@
-# ⚡ EventHub: Where Code Meets Chaos (The Good Kind) ⚡
+# ⚡ EventHub — College Event Management & Coding Contest Platform
 
-Welcome to **EventHub**! If you're tired of clunky, 1990s-style event portals, you've just found your new best friend. We built this for the dreamers, the grinders, and that one friend who refuses to code without a specific RGB color theme.
+> A modern, full-stack platform for managing college events, MCQ quizzes, and coding contests — with real-time leaderboards, analytics, PDF exports, and 4 stunning themes.
 
-Whether you're here to crush an MCQ quiz, dominate a coding contest, or just flex your beautiful profile, we've got you covered.
-
----
-
-## 🎨 Why You'll Love It (The "Wow" Section)
-
-### � Eye Candy for Days
-Looking at a bright white screen at 3 AM is basically a war crime. That's why we added **instant theme switching**:
-- **☀️ Light**: For when you're actually awake and functional.
-- **🌙 Dark**: Our developer's natural habitat.
-- **🌌 Midnight**: Deep blue vibes for that "I'm a hacker" feeling.
-- **🍃 Forest**: Green, because sometimes you need to pretend you've seen a tree.
-
-### 🏆 The Participant's Playground
-- **The "No-Panic" Dashboard**: Filter by what's live, what's coming, and what you missed while napping.
-- **Grid or List?**: We don't judge. Switch your view with one click.
-- **The Heart ❤️ Feature**: Falling in love with a contest? Tap the heart and keep it in your favorites.
-- **Live Countdowns**: Because nothing says "stress" like a ticking clock before a coding bash.
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5-6DB33F?logo=springboot)
+![MongoDB](https://img.shields.io/badge/MongoDB-7.0-47A248?logo=mongodb)
+![JWT](https://img.shields.io/badge/Auth-JWT-000000?logo=jsonwebtokens)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker)
 
 ---
 
-## 🛠️ The "Secret Sauce" (Admin Features)
+## ✨ Features
 
-For the masterminds running the show:
-- **Challenge Creation**: Easier than making instant noodles.
-- **Problem Studio**: Import coding problems via **JSON**. Just drop it and watch the magic happen.
-- **Analytics**: See who's winning and who's... well, trying really hard.
-- **Certificates**: Automatically hand out digital awards because everyone loves a gold star.
+### 🎨 Themes
+Switch between **4 built-in themes** instantly — without page reload:
+| ☀️ Light | 🌙 Dark | 🌌 Midnight | 🍃 Forest |
+|----------|---------|-------------|-----------|
 
----
+### 👤 For Participants
+- **Dashboard** with filters (Live / Upcoming / Completed), search, grid/list toggle
+- **Favorites** — bookmark your favorite events
+- **Live countdown timers** before contest starts
+- **MCQ quizzes** with timed sessions and auto-submission
+- **Coding arena** with multi-language support (Python, Java, C, C++)
+- **Leaderboard** with real-time ranking
+- **Beautiful profile page** with activity tracking
 
-## 📸 See It To Believe It
+### 🛠️ For Admins
+- **Event CRUD** — create, edit, delete MCQ and coding events
+- **Problem Studio** — design coding problems with test cases and JSON import
+- **Analytics dashboard** — per-event statistics, scores, participation rates
+- **PDF exports** — downloadable analytics reports
+- **Certificate management**
 
-### 🏙️ Your Mission Control
-This is where the magic starts. Search, filter, and flip themes faster than you can say "System.out.println".
-![Dashboard](screenshots/Dashboard.png)
-
-### ✍️ Launching the Next Hit
-The lab where you cook up the tests that'll challenge the next generation of geniuses.
-![Create Event](screenshots/create.png)
-
-### 📊 The Wall of Fame (and Pain)
-Real-time tracking of how everyone is doing. Knowledge is power.
-![Analytics](screenshots/analytic.png)
-
-### 👤 Your Hero Profile
-Keep track of your wins, certificates, and that "In-Progress" quiz you keep forgetting about.
-![Profile](screenshots/profile.png)
-
----
-
-## � The Techy Stuff (For My Fellow Nerds)
-
-We used the cool kid tools:
-- **React + Vite**: Because nobody has time for slow builds.
-- **Tailwind CSS**: Making things pretty since... well, since we started using it.
-- **Spring Boot 3**: The heavy-lifting powerhouse in the back.
-- **MongoDB**: Because relational databases are sometimes too much drama.
+### 🔐 Security
+- **JWT-based authentication** (no more insecure Basic Auth)
+- **Role-based authorization** (ADMIN / USER)
+- **BCrypt password hashing**
+- **Protected API endpoints** with `@PreAuthorize`
+- **Environment variable configuration** — no hardcoded secrets
 
 ---
 
-## 🚀 How to Get This Party Started
+## 📁 Project Structure
 
-**1. Grab the code:**
-```bash
-git clone https://github.com/krishna3163/EventProject.git
-cd EventProject
+```
+EventHub/
+├── README.md
+├── PROJECT_AUDIT.md              # Full-stack audit document
+├── docker-compose.yml            # Full stack deployment
+│
+├── EventProject-main/            # ☕ Spring Boot Backend
+│   ├── pom.xml
+│   ├── Dockerfile
+│   ├── .env.example
+│   └── src/main/java/com/company/event/
+│       ├── security/             # JWT, Auth, Security config
+│       ├── user/                 # User domain
+│       ├── quiz/                 # MCQ events, questions, analytics
+│       └── contestPackage/       # Coding contests, problems, submissions
+│
+└── event-frontend/               # ⚛️ React + Vite Frontend
+    ├── Dockerfile
+    ├── .env.example
+    └── src/
+        ├── components/           # Navbar, EventCard, EventForm, Loader
+        ├── pages/                # Dashboard, Login, Signup, Profile, etc.
+        ├── context/              # AuthContext (JWT), ThemeContext
+        └── services/             # API service layer (axios)
 ```
 
-**2. Make the Frontend shine:**
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- **Node.js** 18+ and **npm**
+- **Java** 21 (JDK)
+- **MongoDB** 7.0 (running locally or via Docker)
+
+### Option 1: Run Locally
+
+**1. Start MongoDB** (if not running already):
+```bash
+# Using Docker (recommended)
+docker run -d --name mongodb -p 27017:27017 mongo:7.0
+
+# Or start your local MongoDB service
+```
+
+**2. Start the Backend:**
+```bash
+cd EventProject-main
+.\mvnw.cmd spring-boot:run        # Windows
+./mvnw spring-boot:run             # Mac/Linux
+```
+Backend runs at: `http://localhost:8080`
+Swagger UI: `http://localhost:8080/swagger-ui.html`
+
+> ℹ️ On first startup, a default admin user is created with username `admin` and password `admin123`. You can change these via environment variables.
+
+**3. Start the Frontend:**
 ```bash
 cd event-frontend
 npm install
 npm run dev
 ```
-Check it at: `http://localhost:3000`
+Frontend runs at: `http://localhost:3000`
 
-**3. Fire up the Backend:**
-Open `EventProject-main/src/main/resources/application.yaml`, check your Mongo URI, and then:
+### Option 2: Docker Compose (Full Stack)
+
 ```bash
-cd EventProject-main
-.\mvnw.cmd spring-boot:run
+docker-compose up --build
 ```
-Running on: `http://localhost:8080`
+This starts MongoDB + Backend + Frontend automatically.
+
+| Service   | URL                          |
+|-----------|------------------------------|
+| Frontend  | http://localhost:3000         |
+| Backend   | http://localhost:8080         |
+| Swagger   | http://localhost:8080/swagger-ui.html |
+| MongoDB   | localhost:27017              |
 
 ---
 
-## 🤝 Join the Party!
+## ⚙️ Configuration
 
-Found a bug? Want to add an "Angry Mode" theme? Open a PR! We love help from the community.
+All secrets and configuration are driven by **environment variables** (with sensible defaults for development):
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `MONGODB_URI` | `mongodb://localhost:27017/mydb` | MongoDB connection URI |
+| `SERVER_PORT` | `8080` | Backend server port |
+| `JWT_SECRET` | *(dev default)* | Base64-encoded HMAC-SHA256 secret key |
+| `JWT_EXPIRATION` | `86400000` | Token validity (24h in ms) |
+| `ADMIN_USERNAME` | `admin` | Default admin username |
+| `ADMIN_PASSWORD` | `admin123` | Default admin password |
+| `ADMIN_EMAIL` | `admin@eventhub.com` | Default admin email |
+| `JDOODLE_CLIENT_ID` | `dummy_id` | JDoodle API client ID |
+| `JDOODLE_CLIENT_SECRET` | `dummy_secret` | JDoodle API client secret |
+| `VITE_API_BASE_URL` | `http://localhost:8080` | Backend URL for frontend |
+
+See `.env.example` files in both `EventProject-main/` and `event-frontend/`.
+
+---
+
+## 🔑 API Documentation
+
+### Authentication Endpoints
+| Method | Path | Description | Auth |
+|--------|------|-------------|------|
+| `POST` | `/api/auth/login` | Login, returns JWT | Public |
+| `POST` | `/api/auth/register` | Register new user, returns JWT | Public |
+| `GET`  | `/api/auth/me` | Get current user profile | Bearer |
+
+### Event Endpoints
+| Method | Path | Description | Auth |
+|--------|------|-------------|------|
+| `GET` | `/api/events/getAllEvent` | List all events | Bearer |
+| `GET` | `/api/events/getEventById/{id}` | Get event details | Bearer |
+| `POST` | `/api/events/createEvent` | Create event | Admin |
+| `PUT` | `/api/events/updateEvent/{id}` | Update event | Admin |
+| `DELETE` | `/api/events/deleteEvent/{id}` | Delete event | Admin |
+
+### Contest Endpoints
+| Method | Path | Description | Auth |
+|--------|------|-------------|------|
+| `GET` | `/contest/getAll` | List all contests | Bearer |
+| `POST` | `/contest/insert` | Create contest | Admin |
+| `GET` | `/leaderboard/{contestId}` | Get leaderboard | Bearer |
+| `POST` | `/submission` | Submit code | Bearer |
+
+> 📖 Full interactive docs available at `/swagger-ui.html` when backend is running.
+
+---
+
+## 🧪 Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | React 18, Vite, Tailwind CSS, React Router, Axios, React-Toastify |
+| **Backend** | Spring Boot 3.5, Spring Security, Spring Data MongoDB |
+| **Auth** | JWT (JJWT), BCrypt |
+| **Database** | MongoDB 7.0 |
+| **Code Execution** | JDoodle API |
+| **PDF Generation** | OpenPDF |
+| **API Docs** | SpringDoc OpenAPI (Swagger UI) |
+| **DevOps** | Docker, Docker Compose |
+
+---
+
+## 📸 Screenshots
+
+### Dashboard
+![Dashboard](screenshots/Dashboard.png)
+
+### Create Event
+![Create Event](screenshots/create.png)
+
+### Analytics
+![Analytics](screenshots/analytic.png)
+
+### Profile
+![Profile](screenshots/profile.png)
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
 
 **Developed with ❤️ and a lot of caffeine by [krishna3163](https://github.com/krishna3163)**

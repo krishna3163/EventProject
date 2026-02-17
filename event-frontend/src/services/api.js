@@ -10,13 +10,12 @@ const api = axios.create({
     timeout: 30000,
 });
 
-// Request interceptor for HTTP Basic Auth
+// Request interceptor — Attach JWT Bearer token
 api.interceptors.request.use(
     (config) => {
-        const authData = localStorage.getItem('authData');
-        if (authData) {
-            // authData is expected to be the base64 encoded "username:password"
-            config.headers.Authorization = `Basic ${authData}`;
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
     },
@@ -29,18 +28,28 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        const message = error.response?.data?.message || error.response?.data || error.message || 'An error occurred';
+        const message = error.response?.data?.error || error.response?.data?.message || error.response?.data || error.message || 'An error occurred';
 
         if (error.response?.status === 401) {
-            // Unauthorized - might need to redirect to login
+            // Token expired or invalid — redirect to login
             console.error('Authentication Error:', message);
-            // toast.error('Session expired or invalid credentials');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+
+            // Only redirect if not already on login/register page
+            if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/signup')) {
+                toast.error('Session expired. Please login again.');
+                window.location.href = '/login';
+            }
+        } else if (error.response?.status === 403) {
+            toast.error('Access denied. You do not have permission.');
         } else if (error.code === 'ECONNABORTED' || error.message.includes('timeout') || error.message.includes('Network Error')) {
-            // Suppress background errors for guest mode
-            console.warn('Backend is currently offline. Using mock data where available.');
+            console.warn('Backend is currently offline.');
         } else {
             console.error('API Error:', message);
-            toast.error(message);
+            if (typeof message === 'string') {
+                toast.error(message);
+            }
         }
 
         return Promise.reject(error);
@@ -49,9 +58,15 @@ api.interceptors.response.use(
 
 // Unified API Service
 export const apiService = {
-    // --- USER AUTH & PROFILE ---
+    // --- AUTHENTICATION ---
     auth: {
-        signup: (userData) => api.post('/user/insert', userData),
+        login: (credentials) => api.post('/api/auth/login', credentials),
+        register: (userData) => api.post('/api/auth/register', userData),
+        me: () => api.get('/api/auth/me'),
+    },
+
+    // --- USER PROFILE ---
+    user: {
         getUser: (id) => api.get(`/user/getById/${id}`),
         getAllUsers: () => api.get('/user/getAll'),
         updateUser: (id, userData) => api.put(`/user/update/${id}`, userData),

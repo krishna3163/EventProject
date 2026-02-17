@@ -1,20 +1,20 @@
-package com.company.event.user;
+package com.company.event.security;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserResponse {
+public class AuthResponse {
+    private String token;
     private String id;
     private String username;
-    private String email;
-    private Roles role;
     private String firstName;
     private String lastName;
-    private String fatherName;
-    private String course;
-    private String branch;
+    private String email;
+    private String role;
 }

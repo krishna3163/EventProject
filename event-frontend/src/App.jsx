@@ -51,7 +51,7 @@ const AppRoutes = () => {
     const isExamView = location.pathname.includes('/quiz/') || location.pathname.includes('/contest/');
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+        <div className="min-h-screen flex flex-col font-sans transition-colors duration-300">
             {!isExamView && <Navbar />}
             <main className={`flex-grow ${user && !isExamView ? 'container mx-auto px-4 py-8' : ''}`}>
                 <Routes>

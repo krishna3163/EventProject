@@ -105,8 +105,6 @@ public class UserService {
         userResponse.setId(user.getId());
         userResponse.setRole(user.getRole());
 
-        userResponse.setPassword(null);
-
         return userResponse;
     }
 }

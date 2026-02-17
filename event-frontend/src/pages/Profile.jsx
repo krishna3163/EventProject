@@ -107,24 +107,24 @@ const Profile = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Left: Avatar Card */}
                 <div className="md:col-span-1">
-                    <div className="card p-8 flex flex-col items-center text-center space-y-6 glass-effect border-transparent shadow-2xl">
+                    <div className="theme-card p-8 flex flex-col items-center text-center space-y-6 glass-effect border-transparent shadow-2xl">
                         <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 p-1 shadow-2xl">
-                            <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-5xl font-black text-blue-600 uppercase">
+                            <div className="w-full h-full rounded-full theme-bg-secondary flex items-center justify-center text-5xl font-black text-blue-600 uppercase">
                                 {targetUser.firstName ? targetUser.firstName[0] : 'U'}
                             </div>
                         </div>
                         <div>
-                            <h2 className="text-2xl font-black text-gray-800">{targetUser.firstName} {targetUser.lastName}</h2>
+                            <h2 className="text-2xl font-black theme-text-primary">{targetUser.firstName} {targetUser.lastName}</h2>
                             <p className="text-blue-500 font-bold uppercase tracking-widest text-xs mt-1">{targetUser.role || 'STUDENT'}</p>
                         </div>
                         <div className="pt-6 border-t border-gray-100 w-full space-y-4">
                             <div className="flex justify-between text-sm">
-                                <span className="text-gray-400 font-bold">Member Since</span>
-                                <span className="text-gray-700 font-black">Feb 2026</span>
+                                <span className="theme-text-secondary font-bold">Member Since</span>
+                                <span className="theme-text-primary font-black">Feb 2026</span>
                             </div>
                             <div className="flex justify-between text-sm">
-                                <span className="text-gray-400 font-bold">Events Joined</span>
-                                <span className="text-gray-700 font-black">12</span>
+                                <span className="theme-text-secondary font-bold">Events Joined</span>
+                                <span className="theme-text-primary font-black">12</span>
                             </div>
                         </div>
                     </div>
@@ -183,8 +183,8 @@ const Profile = () => {
                                     { label: 'Roll Number', val: targetUser.id || '22CS104' }
                                 ].map((item, idx) => (
                                     <div key={idx} className="space-y-2">
-                                        <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest leading-none">{item.label}</p>
-                                        <p className="text-lg font-bold text-gray-700">{item.val}</p>
+                                        <p className="text-[10px] font-black theme-text-secondary uppercase tracking-widest leading-none">{item.label}</p>
+                                        <p className="text-lg font-bold theme-text-primary">{item.val}</p>
                                     </div>
                                 ))
                             )}
@@ -248,13 +248,13 @@ const Profile = () => {
 
                     <div className="card p-8 space-y-8 glass-effect overflow-hidden">
                         <div className="flex items-center justify-between border-b border-gray-100 pb-4">
-                            <h3 className="text-xl font-black text-gray-800">Event Activity</h3>
-                            <div className="flex space-x-2 bg-gray-100 p-1 rounded-xl">
+                            <h3 className="text-xl font-black theme-text-primary">Event Activity</h3>
+                            <div className="flex space-x-2 theme-bg-tertiary p-1 rounded-xl">
                                 {['Registered', 'Completed', 'In-Progress'].map(tab => (
                                     <button
                                         key={tab}
                                         onClick={() => setActiveTab(tab)}
-                                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${activeTab === tab ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${activeTab === tab ? 'theme-bg-secondary text-blue-600 shadow-sm' : 'theme-text-secondary hover:theme-text-primary'}`}
                                     >
                                         {tab}
                                     </button>
@@ -273,9 +273,9 @@ const Profile = () => {
                             ]
                                 .filter(event => event.status === activeTab)
                                 .map((event, i) => (
-                                    <div key={i} className="group p-6 rounded-[2rem] border border-gray-50 bg-white hover:border-blue-100 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm hover:shadow-md">
+                                    <div key={i} className="group p-6 rounded-[2rem] border border-gray-50 theme-bg-secondary hover:border-blue-100 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm hover:shadow-md">
                                         <div className="flex-1 space-y-1">
-                                            <p className="text-lg font-bold text-gray-800">{event.name}</p>
+                                            <p className="text-lg font-bold theme-text-primary">{event.name}</p>
                                             <div className="flex items-center space-x-3">
                                                 <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${event.bg} ${event.color}`}>
                                                     {event.status}
@@ -284,11 +284,11 @@ const Profile = () => {
                                             </div>
                                         </div>
                                         <div className="w-full md:w-48 space-y-2">
-                                            <div className="flex justify-between text-[10px] font-black uppercase text-gray-400">
+                                            <div className="flex justify-between text-[10px] font-black uppercase theme-text-secondary">
                                                 <span>Progress</span>
                                                 <span>{event.progress}%</span>
                                             </div>
-                                            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                                            <div className="h-1.5 w-full theme-bg-tertiary rounded-full overflow-hidden">
                                                 <div className={`h-full transition-all duration-1000 ${event.status === 'Completed' ? 'bg-emerald-500' : event.status === 'In-Progress' ? 'bg-amber-500' : 'bg-blue-500'}`} style={{ width: `${event.progress}%` }}></div>
                                             </div>
                                         </div>
@@ -308,22 +308,22 @@ const Profile = () => {
                     </div>
 
                     <div className="card p-8 space-y-6 glass-effect">
-                        <h3 className="text-lg font-black text-gray-800 border-l-4 border-blue-500 pl-4">Recent Accomplishments</h3>
+                        <h3 className="text-lg font-black theme-text-primary border-l-4 border-blue-500 pl-4">Recent Accomplishments</h3>
                         <div className="space-y-4">
                             {[
                                 { name: 'Full Stack Bootcamp', type: 'Participation', date: 'Jan 15, 2026', link: '/certificate/fsb1?type=participation&event=Full Stack Bootcamp' },
                                 { name: 'ML Mastery Quiz', type: 'Rank #3', date: 'Dec 20, 2025', link: '/certificate/mlq?type=rank&rank=3&score=85&event=ML Mastery Quiz' }
                             ].map((cert, i) => (
-                                <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 group hover:border-blue-200 transition-all">
+                                <div key={i} className="flex items-center justify-between p-4 theme-bg-tertiary rounded-2xl border border-gray-100 group hover:border-blue-200 transition-all">
                                     <div className="flex items-center space-x-4">
-                                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                        <div className="w-10 h-10 rounded-full theme-bg-secondary flex items-center justify-center text-blue-600">
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                         </div>
                                         <div>
-                                            <p className="font-bold text-gray-800">{cert.name}</p>
-                                            <p className="text-xs text-gray-400 font-medium">{cert.date} • {cert.type}</p>
+                                            <p className="font-bold theme-text-primary">{cert.name}</p>
+                                            <p className="text-xs theme-text-secondary font-medium">{cert.date} • {cert.type}</p>
                                         </div>
                                     </div>
                                     <button

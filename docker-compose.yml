@@ -1,16 +1,53 @@
 services:
+  # MongoDB Database
   mongodb:
     image: mongo:7.0
-    container_name: mongodb
+    container_name: eventhub-mongodb
     restart: always
     ports:
       - "27017:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
       MONGO_INITDB_DATABASE: mydb
     volumes:
       - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot Backend
+  backend:
+    build:
+      context: ./EventProject-main
+      dockerfile: Dockerfile
+    container_name: eventhub-backend
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/mydb
+      JWT_SECRET: ${JWT_SECRET:-dGhpcyBpcyBhIHZlcnkgbG9uZyBzZWNyZXQga2V5IGZvciBqd3QgdG9rZW4gZ2VuZXJhdGlvbiB1c2luZyBobWFjIHNoYTI1Ng==}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@eventhub.com}
+      JDOODLE_CLIENT_ID: ${JDOODLE_CLIENT_ID:-dummy_id}
+      JDOODLE_CLIENT_SECRET: ${JDOODLE_CLIENT_SECRET:-dummy_secret}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./event-frontend
+      dockerfile: Dockerfile
+    container_name: eventhub-frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
 
 volumes:
   mongodb_data:
