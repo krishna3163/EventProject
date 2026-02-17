@@ -37,11 +37,23 @@ EventHub is a comprehensive, full-stack platform designed to manage and particip
 
 ### 🏙️ Dashboard Overview
 The central hub for all activities. Toggle themes, search for contests, and manage your favorites.
-![Dashboard](screenshots/dashboard.png)
+![Dashboard](screenshots/Dashboard.png)
 
 ### ✍️ Creating Challenges
 A streamlined interface for admins to launch new contests and quizzes.
-![Create Event](screenshots/create_event.png)
+![Create Event](screenshots/create.png)
+
+### 📊 Analytics & Results
+Detailed performance tracking for events and individual participants.
+![Analytics](screenshots/analytic.png)
+
+### 👤 User Profile & Activity
+Monitor your progress, certifications, and manage your personal details.
+![Profile](screenshots/profile.png)
+
+### 📝 Event Registration
+Seamless registration flow for upcoming quizzes and coding contests.
+![Registration](screenshots/quiz_registation_page.png)
 
 ---
 
