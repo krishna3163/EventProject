@@ -25,8 +25,10 @@ const Signup = () => {
         e.preventDefault();
         setIsLoading(true);
         try {
-            const result = await signup(formData);
-            if (result) navigate('/');
+            await signup(formData);
+            // If email verification is enabled, we might not navigate immediately
+            // But usually, we redirect to login or show a message
+            navigate('/login');
         } catch (error) {
             console.error(error);
         } finally {

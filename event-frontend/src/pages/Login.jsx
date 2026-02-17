@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const { login } = useAuth();
@@ -13,7 +13,7 @@ const Login = () => {
         e.preventDefault();
         setIsLoading(true);
         try {
-            await login(username, password);
+            await login(email, password);
             navigate('/');
         } catch (error) {
             console.error(error);
@@ -44,7 +44,7 @@ const Login = () => {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2">
-                        <label className="text-sm font-bold theme-text-primary ml-1">Username</label>
+                        <label className="text-sm font-bold theme-text-primary ml-1">Email Address</label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,12 +52,12 @@ const Login = () => {
                                 </svg>
                             </div>
                             <input
-                                type="text"
+                                type="email"
                                 required
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                                 className="input-field pl-12"
-                                placeholder="Enter your username"
+                                placeholder="Enter your email"
                             />
                         </div>
                     </div>

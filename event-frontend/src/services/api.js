@@ -28,23 +28,14 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        const message = error.response?.data?.error || error.response?.data?.message || error.response?.data || error.message || 'An error occurred';
+        const message = error.response?.data?.error || error.response?.data?.message || 'An error occurred';
 
         if (error.response?.status === 401) {
-            // Token expired or invalid — redirect to login
-            console.error('Authentication Error:', message);
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-
-            // Only redirect if not already on login/register page
-            if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/signup')) {
-                toast.error('Session expired. Please login again.');
-                window.location.href = '/login';
-            }
+            console.error('Authentication Error: Session expired or invalid');
+            // Supabase handles refresh, but if the backend returns 401, 
+            // the token might be truly invalid or corrupted.
         } else if (error.response?.status === 403) {
             toast.error('Access denied. You do not have permission.');
-        } else if (error.code === 'ECONNABORTED' || error.message.includes('timeout') || error.message.includes('Network Error')) {
-            console.warn('Backend is currently offline.');
         } else {
             console.error('API Error:', message);
             if (typeof message === 'string') {
@@ -58,11 +49,9 @@ api.interceptors.response.use(
 
 // Unified API Service
 export const apiService = {
-    // --- AUTHENTICATION ---
+    // --- AUTHENTICATION & SYNC ---
     auth: {
-        login: (credentials) => api.post('/api/auth/login', credentials),
-        register: (userData) => api.post('/api/auth/register', userData),
-        me: () => api.get('/api/auth/me'),
+        sync: () => api.post('/api/users/sync'),
     },
 
     // --- USER PROFILE ---
@@ -95,8 +84,9 @@ export const apiService = {
 
     // --- REGISTRATIONS ---
     registration: {
-        register: (eventId, studentId) => api.post(`/api/registrations/${eventId}`, null, { headers: { studentId } }),
-        cancel: (eventId, studentId) => api.post(`/api/registrations/cancel/${eventId}`, null, { headers: { studentId } }),
+        register: (eventId, userId) => api.post(`/api/events/${eventId}/register`, { userId }),
+        getParticipants: (eventId) => api.get(`/api/events/${eventId}/participants`),
+        unregister: (eventId, userId) => api.delete(`/api/events/${eventId}/unregister`, { params: { userId } }),
     },
 
     // --- CODING CONTESTS ---

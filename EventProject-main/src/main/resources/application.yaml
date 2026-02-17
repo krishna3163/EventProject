@@ -4,14 +4,20 @@ spring:
   data:
     mongodb:
       uri: ${MONGODB_URI:mongodb://localhost:27017/mydb}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${supabase.url}/auth/v1
+          jwk-set-uri: ${supabase.url}/auth/v1/.well-known/jwks.json
 
 server:
   port: ${SERVER_PORT:8080}
 
-# JWT Configuration
-jwt:
-  secret: ${JWT_SECRET:dGhpcyBpcyBhIHZlcnkgbG9uZyBzZWNyZXQga2V5IGZvciBqd3QgdG9rZW4gZ2VuZXJhdGlvbiB1c2luZyBobWFjIHNoYTI1Ng==}
-  expiration: ${JWT_EXPIRATION:86400000}   # 24 hours in ms
+# Supabase Configuration
+supabase:
+  url: ${SUPABASE_URL:https://jjarmqjnicpupconlggr.supabase.co}
+  service-role-key: ${SUPABASE_SERVICE_ROLE_KEY}
 
 # Default Admin (created on first startup)
 app:
@@ -48,3 +54,10 @@ logging:
     org.springframework.security: WARN
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/app.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 7

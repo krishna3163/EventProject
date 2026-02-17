@@ -1,58 +1,58 @@
 package com.company.event.user;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.service.annotation.DeleteExchange;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class UserController {
 
-    private final UserService userService;
+    private final UserRepository userRepository;
 
-    @PostMapping("/insert")
-    public ResponseEntity<?> insertUser(@Valid @RequestBody UserRequest userRequest) {
-        User user =  userService.insertUser(userRequest);
-        if(user==null){
-            return new ResponseEntity<>("User not created",HttpStatus.BAD_REQUEST);
+    @PostMapping("/sync")
+    public ResponseEntity<?> syncUser(@AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject(); // 'sub' claim in Supabase JWT
+        String email = jwt.getClaim("email");
+        Map<String, Object> metadata = jwt.getClaim("user_metadata");
+
+        log.info("Syncing user {} with email {}", userId, email);
+
+        User user = userRepository.findById(userId).orElse(new User());
+        user.setId(userId);
+        user.setEmail(email);
+
+        if (metadata != null) {
+            user.setFirstName((String) metadata.getOrDefault("firstName", user.getFirstName()));
+            user.setLastName((String) metadata.getOrDefault("lastName", user.getLastName()));
+            user.setCourse((String) metadata.getOrDefault("course", user.getCourse()));
+            user.setBranch((String) metadata.getOrDefault("branch", user.getBranch()));
+            user.setFatherName((String) metadata.getOrDefault("fatherName", user.getFatherName()));
+
+            // Handle role from metadata
+            String roleStr = (String) metadata.getOrDefault("role", "USER");
+            try {
+                user.setRole(Roles.valueOf(roleStr.toUpperCase()));
+            } catch (Exception e) {
+                user.setRole(Roles.USER);
+            }
         }
-        return new ResponseEntity<>("User Created", HttpStatus.OK);
-    }
 
-    @GetMapping("/getById/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable String id){
-        UserResponse userResponse = userService.getUserById(id);
-        if(userResponse==null){
-            return new ResponseEntity<>("User not found",HttpStatus.BAD_REQUEST);
+        // Generate username from email if not present
+        if (user.getUsername() == null) {
+            user.setUsername(email.split("@")[0]);
         }
-        return new ResponseEntity<>(userResponse, HttpStatus.OK);
-    }
 
-    @GetMapping("/getAll")
-    public ResponseEntity<?> getAllUsers(){
-        return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
-    }
+        userRepository.save(user);
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteUserById(@PathVariable String id){
-        boolean result = userService.deleteUserById(id);
-        if(result){
-            return new ResponseEntity<>("User deleted",HttpStatus.OK);
-        }
-        return new ResponseEntity<>("User not found",HttpStatus.BAD_REQUEST);
-    }
-
-    @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateUser( @PathVariable String id,@Valid @RequestBody UserRequest userRequest){
-        UserResponse userResponse = userService.updateUser(userRequest,id);
-        if(userResponse==null){
-            return new ResponseEntity<>("User not found",HttpStatus.BAD_REQUEST);
-        }
-        return new ResponseEntity<>(userResponse, HttpStatus.OK);
+        return ResponseEntity.ok(Map.of("message", "User synced successfully", "userId", userId));
     }
 }

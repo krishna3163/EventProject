@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient';
 import { apiService } from '../services/api';
 import { toast } from 'react-toastify';
 
@@ -10,69 +11,118 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // On mount: check for saved token and validate it
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        const savedUser = localStorage.getItem('user');
+        // Handle session on mount
+        const getInitialSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                handleUserSession(session);
+            }
+            setLoading(false);
+        };
 
-        if (token && savedUser) {
-            try {
-                const parsedUser = JSON.parse(savedUser);
-                setUser(parsedUser);
-            } catch {
-                // Corrupted data — clean up
+        getInitialSession();
+
+        // Listen for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            if (session) {
+                handleUserSession(session);
+            } else {
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
+                setUser(null);
             }
-        }
-        setLoading(false);
+            setLoading(false);
+        });
+
+        return () => subscription.unsubscribe();
     }, []);
 
-    const login = async (username, password) => {
+    const handleUserSession = async (session) => {
+        const token = session.access_token;
+        const supabaseUser = session.user;
+
+        localStorage.setItem('token', token);
+
+        // Custom metadata might contain info like role, or we default to USER
+        const userData = {
+            id: supabaseUser.id,
+            email: supabaseUser.email,
+            firstName: supabaseUser.user_metadata?.firstName || 'User',
+            lastName: supabaseUser.user_metadata?.lastName || '',
+            role: supabaseUser.user_metadata?.role || 'USER'
+        };
+
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
+
+        // Sync with MongoDB backend
         try {
-            const response = await apiService.auth.login({ username, password });
-            const { token, ...userData } = response.data;
-
-            // Store JWT token and user data
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(userData));
-            setUser(userData);
-
-            toast.success(`Welcome back, ${userData.firstName}!`);
-            return userData;
+            await apiService.auth.sync();
         } catch (error) {
-            console.error('Login failed:', error);
-            const msg = error.response?.data?.error || 'Login failed. Please try again.';
-            toast.error(msg);
+            console.error('User sync failed:', error);
+        }
+    };
+
+    const login = async (email, password) => {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
+
+        if (error) {
+            toast.error(error.message);
             throw error;
         }
+
+        toast.success(`Welcome back!`);
+        return data.user;
     };
 
     const signup = async (userData) => {
-        try {
-            const response = await apiService.auth.register(userData);
-            const { token, ...user } = response.data;
+        const { data, error } = await supabase.auth.signUp({
+            email: userData.email,
+            password: userData.password,
+            options: {
+                data: {
+                    firstName: userData.firstName,
+                    lastName: userData.lastName,
+                    role: 'USER', // Default role
+                    course: userData.course,
+                    branch: userData.branch
+                }
+            }
+        });
 
-            // Auto-login after successful registration
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
-            setUser(user);
-
-            toast.success('Registration successful! Welcome to EventHub!');
-            return user;
-        } catch (error) {
-            console.error('Signup error:', error);
-            const msg = error.response?.data?.error || 'Registration failed. Please try again.';
-            toast.error(msg);
+        if (error) {
+            toast.error(error.message);
             return null;
         }
+
+        if (data.session) {
+            toast.success('Registration successful!');
+        } else {
+            toast.info('Please check your email for verification link.');
+        }
+
+        return data.user;
     };
 
-    const logout = () => {
+    const logout = async () => {
+        await supabase.auth.signOut();
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setUser(null);
         toast.info('Logged out successfully');
+    };
+
+    const resetPassword = async (email) => {
+        const { error } = await supabase.auth.resetPasswordForEmail(email);
+        if (error) {
+            toast.error(error.message);
+            throw error;
+        }
+        toast.success('Password reset email sent!');
     };
 
     const value = {
@@ -82,6 +132,7 @@ export const AuthProvider = ({ children }) => {
         login,
         signup,
         logout,
+        resetPassword,
         isAdmin: user?.role === 'ADMIN',
         isAuthenticated: !!user
     };

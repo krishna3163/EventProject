@@ -153,12 +153,15 @@ See `.env.example` files in both `EventProject-main/` and `event-frontend/`.
 
 ## 🔑 API Documentation
 
-### Authentication Endpoints
-| Method | Path | Description | Auth |
-|--------|------|-------------|------|
-| `POST` | `/api/auth/login` | Login, returns JWT | Public |
-| `POST` | `/api/auth/register` | Register new user, returns JWT | Public |
-| `GET`  | `/api/auth/me` | Get current user profile | Bearer |
+### Authentication (Powered by Supabase)
+This project uses **Supabase Auth** for user management. Supabase handles login, registration, email verification, and password resets. The Spring Boot backend acts as a **Resource Server**, validating Supabase JWTs.
+
+| Method | Path | Description | Provider |
+|--------|------|-------------|----------|
+| `POST` | `/api/auth/login` | Handled by Supabase Client | Supabase |
+| `POST` | `/api/auth/register` | Handled by Supabase Client | Supabase |
+| `POST` | `/api/users/sync` | Syncs Supabase user to MongoDB | Backend |
+| `GET`  | `/api/auth/me` | DEPRECATED (Use user state) | - |
 
 ### Event Endpoints
 | Method | Path | Description | Auth |
@@ -185,10 +188,10 @@ See `.env.example` files in both `EventProject-main/` and `event-frontend/`.
 
 | Layer | Technology |
 |-------|------------|
-| **Frontend** | React 18, Vite, Tailwind CSS, React Router, Axios, React-Toastify |
-| **Backend** | Spring Boot 3.5, Spring Security, Spring Data MongoDB |
-| **Auth** | JWT (JJWT), BCrypt |
-| **Database** | MongoDB 7.0 |
+| **Frontend** | React 18, Vite, Tailwind CSS, Supabase JS |
+| **Backend** | Spring Boot 3.5, Spring Security Resource Server |
+| **Auth** | Supabase Auth (JWT), OAuth2 Resource Server |
+| **Database** | MongoDB 7.0 (Atlas) |
 | **Code Execution** | JDoodle API |
 | **PDF Generation** | OpenPDF |
 | **API Docs** | SpringDoc OpenAPI (Swagger UI) |

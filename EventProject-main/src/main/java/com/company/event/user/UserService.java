@@ -1,7 +1,6 @@
 package com.company.event.user;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -12,7 +11,6 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
     public User insertUser(UserRequest userRequest) {
         User user = new User();
@@ -20,7 +18,7 @@ public class UserService {
         user.setFirstName(userRequest.getFirstName());
         user.setLastName(userRequest.getLastName());
 
-        user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        // Passwords handled by Supabase
 
         user.setBranch(userRequest.getBranch());
         user.setCourse(userRequest.getCourse());
@@ -45,7 +43,6 @@ public class UserService {
     }
 
     public List<UserResponse> getAllUsers() {
-
         List<User> users = userRepository.findAll();
         List<UserResponse> userResponseList = new ArrayList<>();
 
@@ -57,7 +54,6 @@ public class UserService {
     }
 
     public boolean deleteUserById(String id) {
-
         if (!userRepository.existsById(id)) {
             return false;
         }
@@ -67,7 +63,6 @@ public class UserService {
     }
 
     public UserResponse updateUser(UserRequest userRequest, String id) {
-
         User user = userRepository.findById(id).orElse(null);
         if (user == null) {
             return null;
@@ -76,11 +71,6 @@ public class UserService {
         user.setEmail(userRequest.getEmail());
         user.setFirstName(userRequest.getFirstName());
         user.setLastName(userRequest.getLastName());
-
-        if (userRequest.getPassword() != null &&
-                !userRequest.getPassword().isBlank()) {
-            user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-        }
 
         user.setBranch(userRequest.getBranch());
         user.setCourse(userRequest.getCourse());
@@ -93,7 +83,6 @@ public class UserService {
     }
 
     private UserResponse mapToResponse(User user) {
-
         UserResponse userResponse = new UserResponse();
         userResponse.setEmail(user.getEmail());
         userResponse.setFirstName(user.getFirstName());

@@ -15,19 +15,15 @@ public class Event {
     private String id;
 
     private String title;
-
+    private String description;
     private String type; // MCQ
+    private Integer maxParticipants;
 
     private Instant startTime;
-
     private Instant endTime;
-
     private Integer durationInMinutes;
 
     private Boolean attendanceProcessed = false;
-
-
     private Integer totalMarks;
-
     private String status; // UPCOMING, LIVE, COMPLETED
 }
