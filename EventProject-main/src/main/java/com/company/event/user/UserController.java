@@ -36,6 +36,7 @@ public class UserController {
             user.setCourse((String) metadata.getOrDefault("course", user.getCourse()));
             user.setBranch((String) metadata.getOrDefault("branch", user.getBranch()));
             user.setFatherName((String) metadata.getOrDefault("fatherName", user.getFatherName()));
+            user.setUsername((String) metadata.getOrDefault("username", user.getUsername()));
 
             // Handle role from metadata
             String roleStr = (String) metadata.getOrDefault("role", "USER");
@@ -46,8 +47,8 @@ public class UserController {
             }
         }
 
-        // Generate username from email if not present
-        if (user.getUsername() == null) {
+        // Generate username from email if still not present
+        if (user.getUsername() == null || user.getUsername().isBlank()) {
             user.setUsername(email.split("@")[0]);
         }
 

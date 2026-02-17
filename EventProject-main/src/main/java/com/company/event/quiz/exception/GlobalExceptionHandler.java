@@ -29,16 +29,23 @@ public class GlobalExceptionHandler {
         return createResponse(HttpStatus.BAD_REQUEST, "Validation failed: " + msg);
     }
 
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNotFound(
+            org.springframework.web.servlet.resource.NoResourceFoundException ex) {
+        log.warn("Resource not found: {}", ex.getMessage());
+        return createResponse(HttpStatus.NOT_FOUND, "The requested resource was not found on the server");
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, Object>> handleRuntime(RuntimeException ex) {
         log.error("Runtime error: ", ex);
-        return createResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+        return createResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Server Error: " + ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
-        log.error("Unexpected error: ", ex);
-        return createResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
+        log.error("Unexpected error [{}]: {}", ex.getClass().getName(), ex.getMessage());
+        return createResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + ex.getMessage());
     }
 
     private ResponseEntity<Map<String, Object>> createResponse(HttpStatus status, String message) {

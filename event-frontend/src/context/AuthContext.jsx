@@ -87,6 +87,7 @@ export const AuthProvider = ({ children }) => {
                 data: {
                     firstName: userData.firstName,
                     lastName: userData.lastName,
+                    username: userData.username,
                     role: 'USER', // Default role
                     course: userData.course,
                     branch: userData.branch
