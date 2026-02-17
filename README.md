@@ -110,4 +110,5 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
 
-**Developed with ❤️ by krishna3163**
+**Developed with ❤️ by EventProject
+ Team**
