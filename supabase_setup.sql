@@ -35,7 +35,10 @@ BEGIN
     new.email,
     COALESCE(new.raw_user_meta_data->>'firstName', ''),
     COALESCE(new.raw_user_meta_data->>'lastName', ''),
-    COALESCE(new.raw_user_meta_data->>'role', 'USER')
+    CASE 
+      WHEN new.email = 'admin@eventhub.com' THEN 'ADMIN'
+      ELSE COALESCE(new.raw_user_meta_data->>'role', 'USER')
+    END
   );
   RETURN NEW;
 END;

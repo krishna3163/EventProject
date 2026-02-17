@@ -47,6 +47,12 @@ public class UserController {
             }
         }
 
+        // --- ADMIN ROLE FALLBACK ---
+        // Force ADMIN role for the specific admin email
+        if ("admin@eventhub.com".equalsIgnoreCase(email)) {
+            user.setRole(Roles.ADMIN);
+        }
+
         // Generate username from email if still not present
         if (user.getUsername() == null || user.getUsername().isBlank()) {
             user.setUsername(email.split("@")[0]);
