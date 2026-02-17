@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: event
+  data:
+    mongodb:
+      uri: mongodb://admin:password@localhost:27017/mydb?authSource=admin
+server:
+  port: 8080
