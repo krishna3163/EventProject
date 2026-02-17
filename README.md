@@ -2,6 +2,10 @@
 
 > A modern, full-stack platform for managing college events, MCQ quizzes, and coding contests — with real-time leaderboards, analytics, PDF exports, and 4 stunning themes.
 
+> 🚧 **Status:** Currently in the **Developer Phase** — actively improving security, features, and code quality.
+>
+> 🌐 **Live Preview:** [View Demo](https://event-project-4kaj2qtva-krishna3163s-projects.vercel.app/)
+
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5-6DB33F?logo=springboot)
 ![MongoDB](https://img.shields.io/badge/MongoDB-7.0-47A248?logo=mongodb)
