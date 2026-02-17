@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: event
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/mydb
+server:
+  port: 8080
+
+jdoodle:
+  client-id: dummy_id
+  client-secret: dummy_secret
+  api-url: https://api.jdoodle.com/v1/execute
