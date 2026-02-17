@@ -17,7 +17,9 @@
 ## ✨ Features
 
 ### 🎨 Themes
-Switch between **4 built-in themes** instantly — without page reload:
+Switch between **4 built-in themes** instantly.
+> ⚠️ **Note:** Themes are currently in the **Developer Phase** and may contain layout bugs. We're actively working on fixing theme-specific CSS inconsistencies.
+
 | ☀️ Light | 🌙 Dark | 🌌 Midnight | 🍃 Forest |
 |----------|---------|-------------|-----------|
 
@@ -212,6 +214,14 @@ See `.env.example` files in both `EventProject-main/` and `event-frontend/`.
 
 ## 🤝 Contributing
 
+We ❤️ contributions! Whether you're fixing a bug, improving themes, or adding new features, your help is welcome.
+
+**We are specifically looking for help with:**
+- 🐛 **Bug Hunting:** Finding and reporting edge-case bugs.
+- 🎨 **Theme Fixes:** Resolving CSS inconsistencies in the 4 developer-phase themes.
+- 🚀 **Feature Enhancements:** Improving the coding arena and analytics.
+
+**How to contribute:**
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
