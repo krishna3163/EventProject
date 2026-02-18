@@ -64,6 +64,7 @@ export const apiService = {
         getUser: (id) => api.get(`/user/getById/${id}`),
         getAllUsers: () => api.get('/user/getAll'),
         updateUser: (id, userData) => api.put(`/user/update/${id}`, userData),
+        updateProfile: (fields) => api.patch('/api/users/me/profile', fields),
         deleteUser: (id) => api.delete(`/user/delete/${id}`),
     },
 

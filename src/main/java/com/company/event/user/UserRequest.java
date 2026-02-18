@@ -30,4 +30,7 @@ public class UserRequest {
     private String course;
     @NotBlank
     private String branch;
+    private String college;
+    private String rollNumber;
+    private String academicYear;
 }

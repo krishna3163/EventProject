@@ -41,6 +41,8 @@ public class User implements UserDetails {
     private String organizationId; // nullable, for ORG_ADMIN users
     private String phone;
     private String college;
+    private String rollNumber;
+    private String academicYear;
     private String firebaseUid;
     private String photoUrl;
     @Builder.Default

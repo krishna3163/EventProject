@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -86,6 +87,9 @@ public class UserService {
         user.setCourse(userRequest.getCourse());
         user.setFatherName(userRequest.getFatherName());
         user.setUsername(userRequest.getUsername());
+        user.setCollege(userRequest.getCollege());
+        user.setRollNumber(userRequest.getRollNumber());
+        user.setAcademicYear(userRequest.getAcademicYear());
 
         userRepository.save(user);
 
@@ -104,9 +108,37 @@ public class UserService {
         userResponse.setUsername(user.getUsername());
         userResponse.setId(user.getId());
         userResponse.setRole(user.getRole());
+        userResponse.setCollege(user.getCollege());
+        userResponse.setRollNumber(user.getRollNumber());
+        userResponse.setAcademicYear(user.getAcademicYear());
+        userResponse.setPhone(user.getPhone());
 
         userResponse.setPassword(null);
 
         return userResponse;
+    }
+
+    public UserResponse patchUserProfile(String id, Map<String, String> fields) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null)
+            return null;
+
+        fields.forEach((key, value) -> {
+            switch (key) {
+                case "username" -> user.setUsername(value);
+                case "firstName" -> user.setFirstName(value);
+                case "lastName" -> user.setLastName(value);
+                case "email" -> user.setEmail(value);
+                case "branch" -> user.setBranch(value);
+                case "college" -> user.setCollege(value);
+                case "rollNumber" -> user.setRollNumber(value);
+                case "academicYear" -> user.setAcademicYear(value);
+                case "course" -> user.setCourse(value);
+                case "phone" -> user.setPhone(value);
+            }
+        });
+
+        userRepository.save(user);
+        return mapToResponse(user);
     }
 }

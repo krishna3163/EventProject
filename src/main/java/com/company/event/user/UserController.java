@@ -85,4 +85,16 @@ public class UserController {
         User user = (User) authentication.getPrincipal();
         return ResponseEntity.ok(userService.getUserById(user.getId()));
     }
+
+    /** Update own profile (authenticated user) */
+    @PatchMapping("/api/users/me/profile")
+    public ResponseEntity<?> updateMyProfile(Authentication authentication, @RequestBody Map<String, String> fields) {
+        if (authentication == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        User user = (User) authentication.getPrincipal();
+        UserResponse updated = userService.patchUserProfile(user.getId(), fields);
+        if (updated == null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        return ResponseEntity.ok(updated);
+    }
 }

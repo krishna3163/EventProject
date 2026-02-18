@@ -4,6 +4,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { apiService } from '../services/api';
 import { toast } from 'react-toastify';
 
+const ACADEMIC_YEAR_OPTIONS = ['1st Year', '2nd Year', '3rd Year', '4th Year', '5th Year', 'Alumni'];
+
 const Profile = () => {
     const { userId } = useParams();
     const { user, setUser } = useAuth();
@@ -12,6 +14,7 @@ const Profile = () => {
     const [editData, setEditData] = useState({});
     const [viewedUser, setViewedUser] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [activeTab, setActiveTab] = useState('Registered');
     const [history, setHistory] = useState([]);
@@ -83,12 +86,11 @@ const Profile = () => {
         const nameParts = fallbackName.split(' ');
 
         try {
-            const response = await apiService.auth.getUser(userId);
+            const response = await apiService.user.getUser(userId);
             setViewedUser(response.data);
         } catch (error) {
             console.error('Could not load user profile:', error);
 
-            // FALLBACK: Use URL params for name if DB fetch fails
             if (userId && userId !== 'demo') {
                 setViewedUser({
                     id: userId,
@@ -115,17 +117,63 @@ const Profile = () => {
         return null;
     }
 
-    const handleUpdateProfile = () => {
-        setUser(editData);
-        localStorage.setItem('user', JSON.stringify(editData));
-        setIsEditing(false);
-        toast.success('Profile updated successfully!');
+    const handleStartEdit = () => {
+        setEditData({
+            username: targetUser.username || '',
+            firstName: targetUser.firstName || '',
+            lastName: targetUser.lastName || '',
+            email: targetUser.email || '',
+            branch: targetUser.branch || '',
+            college: targetUser.college || '',
+            rollNumber: targetUser.rollNumber || '',
+            academicYear: targetUser.academicYear || '',
+        });
+        setIsEditing(true);
+    };
+
+    const handleUpdateProfile = async () => {
+        setSaving(true);
+        try {
+            const response = await apiService.user.updateProfile(editData);
+            const updatedUser = { ...user, ...response.data };
+            setUser(updatedUser);
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            setIsEditing(false);
+            toast.success('Profile updated successfully!');
+        } catch (err) {
+            console.error('Profile update failed:', err);
+            // Fallback: local-only update
+            const localUpdate = { ...user, ...editData };
+            setUser(localUpdate);
+            localStorage.setItem('user', JSON.stringify(localUpdate));
+            setIsEditing(false);
+            toast.success('Profile updated locally!');
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleChangePassword = (e) => {
         e.preventDefault();
         setShowPasswordModal(false);
         toast.success('Password changed successfully (Demo Mode)!');
+    };
+
+    const profileFields = [
+        { key: 'username', label: 'Username', icon: '👤', editable: true, type: 'text' },
+        { key: 'email', label: 'Email Address', icon: '✉️', editable: true, type: 'email' },
+        { key: 'fullName', label: 'Full Name', icon: '📛', editable: false, composite: true },
+        { key: 'branch', label: 'Department', icon: '🏛️', editable: true, type: 'text' },
+        { key: 'college', label: 'University / College', icon: '🎓', editable: true, type: 'text' },
+        { key: 'academicYear', label: 'Academic Year', icon: '📅', editable: true, type: 'select', options: ACADEMIC_YEAR_OPTIONS },
+        { key: 'rollNumber', label: 'Roll Number', icon: '🔢', editable: true, type: 'text' },
+    ];
+
+    const getFieldValue = (field) => {
+        if (field.composite && field.key === 'fullName') {
+            return `${targetUser.firstName || ''} ${targetUser.lastName || ''}`.trim() || 'N/A';
+        }
+        return targetUser[field.key] || 'Not set';
     };
 
     return (
@@ -161,6 +209,9 @@ const Profile = () => {
                         <div>
                             <h2 className="text-2xl font-black theme-text-primary">{targetUser.firstName} {targetUser.lastName}</h2>
                             <p className="text-blue-500 font-bold uppercase tracking-widest text-xs mt-1">{targetUser.role || 'STUDENT'}</p>
+                            {targetUser.college && (
+                                <p className="text-gray-400 text-sm mt-2 font-medium">🎓 {targetUser.college}</p>
+                            )}
                         </div>
                         <div className="pt-6 border-t border-gray-100 w-full space-y-4">
                             <div className="flex justify-between text-sm">
@@ -169,7 +220,7 @@ const Profile = () => {
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span className="theme-text-secondary font-bold">Events Joined</span>
-                                <span className="theme-text-primary font-black">12</span>
+                                <span className="theme-text-primary font-black">{history.length || 0}</span>
                             </div>
                         </div>
                     </div>
@@ -178,58 +229,108 @@ const Profile = () => {
                 {/* Right: Personal Info */}
                 <div className="md:col-span-2 space-y-8">
                     <div className="card p-10 space-y-10 glass-effect border-transparent shadow-xl">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             {isEditing ? (
                                 <>
+                                    {/* Username */}
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-300 uppercase tracking-widest ml-1">First Name</label>
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">👤 Username</label>
                                         <input
                                             type="text"
                                             className="input-field"
-                                            value={editData.firstName}
-                                            onChange={(e) => setEditData({ ...editData, firstName: e.target.value })}
+                                            value={editData.username}
+                                            onChange={(e) => setEditData({ ...editData, username: e.target.value })}
+                                            placeholder="Enter username"
                                         />
                                     </div>
+                                    {/* Email */}
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-300 uppercase tracking-widest ml-1">Last Name</label>
-                                        <input
-                                            type="text"
-                                            className="input-field"
-                                            value={editData.lastName}
-                                            onChange={(e) => setEditData({ ...editData, lastName: e.target.value })}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-300 uppercase tracking-widest ml-1">Email</label>
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">✉️ Email Address</label>
                                         <input
                                             type="email"
                                             className="input-field"
                                             value={editData.email}
                                             onChange={(e) => setEditData({ ...editData, email: e.target.value })}
+                                            placeholder="Enter email"
                                         />
                                     </div>
+                                    {/* First Name */}
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-300 uppercase tracking-widest ml-1">Department</label>
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">📛 First Name</label>
+                                        <input
+                                            type="text"
+                                            className="input-field"
+                                            value={editData.firstName}
+                                            onChange={(e) => setEditData({ ...editData, firstName: e.target.value })}
+                                            placeholder="Enter first name"
+                                        />
+                                    </div>
+                                    {/* Last Name */}
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">📛 Last Name</label>
+                                        <input
+                                            type="text"
+                                            className="input-field"
+                                            value={editData.lastName}
+                                            onChange={(e) => setEditData({ ...editData, lastName: e.target.value })}
+                                            placeholder="Enter last name"
+                                        />
+                                    </div>
+                                    {/* Department */}
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">🏛️ Department</label>
                                         <input
                                             type="text"
                                             className="input-field"
                                             value={editData.branch}
                                             onChange={(e) => setEditData({ ...editData, branch: e.target.value })}
+                                            placeholder="e.g. Computer Science"
+                                        />
+                                    </div>
+                                    {/* University / College */}
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">🎓 University / College</label>
+                                        <input
+                                            type="text"
+                                            className="input-field"
+                                            value={editData.college}
+                                            onChange={(e) => setEditData({ ...editData, college: e.target.value })}
+                                            placeholder="e.g. IIT Delhi, NIT Patna"
+                                        />
+                                    </div>
+                                    {/* Academic Year */}
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">📅 Academic Year</label>
+                                        <select
+                                            className="input-field"
+                                            value={editData.academicYear}
+                                            onChange={(e) => setEditData({ ...editData, academicYear: e.target.value })}
+                                        >
+                                            <option value="">Select Year</option>
+                                            {ACADEMIC_YEAR_OPTIONS.map(opt => (
+                                                <option key={opt} value={opt}>{opt}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    {/* Roll Number */}
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">🔢 Roll Number</label>
+                                        <input
+                                            type="text"
+                                            className="input-field"
+                                            value={editData.rollNumber}
+                                            onChange={(e) => setEditData({ ...editData, rollNumber: e.target.value })}
+                                            placeholder="e.g. 22CS104"
                                         />
                                     </div>
                                 </>
                             ) : (
-                                [
-                                    { label: 'Username', val: targetUser.username || 'user_' + (targetUser.id || 'demo') },
-                                    { label: 'Email Address', val: targetUser.email || 'N/A' },
-                                    { label: 'Full Name', val: `${targetUser.firstName} ${targetUser.lastName}` },
-                                    { label: 'Department', val: targetUser.branch || 'Computer Science' },
-                                    { label: 'Academic Year', val: '3rd Year' },
-                                    { label: 'Roll Number', val: targetUser.id || '22CS104' }
-                                ].map((item, idx) => (
-                                    <div key={idx} className="space-y-2">
-                                        <p className="text-[10px] font-black theme-text-secondary uppercase tracking-widest leading-none">{item.label}</p>
-                                        <p className="text-lg font-bold theme-text-primary">{item.val}</p>
+                                profileFields.map((field, idx) => (
+                                    <div key={idx} className="space-y-2 group">
+                                        <p className="text-[10px] font-black theme-text-secondary uppercase tracking-widest leading-none flex items-center gap-1">
+                                            <span>{field.icon}</span> {field.label}
+                                        </p>
+                                        <p className="text-lg font-bold theme-text-primary">{getFieldValue(field)}</p>
                                     </div>
                                 ))
                             )}
@@ -241,12 +342,21 @@ const Profile = () => {
                                     <>
                                         <button
                                             onClick={handleUpdateProfile}
-                                            className="flex-1 py-4 bg-emerald-600 text-white font-black rounded-2xl shadow-xl hover:bg-emerald-700 transition-all active:scale-95"
+                                            disabled={saving}
+                                            className="flex-1 py-4 bg-emerald-600 text-white font-black rounded-2xl shadow-xl hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                         >
-                                            Save Changes
+                                            {saving ? (
+                                                <>
+                                                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                                    </svg>
+                                                    Saving...
+                                                </>
+                                            ) : 'Save Changes'}
                                         </button>
                                         <button
-                                            onClick={() => { setIsEditing(false); setEditData({ ...user }); }}
+                                            onClick={() => { setIsEditing(false); setEditData({}); }}
                                             className="flex-1 py-4 border-2 border-gray-100 text-gray-500 font-black rounded-2xl hover:bg-gray-50 transition-all active:scale-95"
                                         >
                                             Cancel
@@ -255,19 +365,16 @@ const Profile = () => {
                                 ) : (
                                     <>
                                         <button
-                                            onClick={() => {
-                                                setEditData({ ...user });
-                                                setIsEditing(true);
-                                            }}
+                                            onClick={handleStartEdit}
                                             className="flex-1 py-4 bg-gray-800 text-white font-black rounded-2xl shadow-xl hover:bg-gray-900 transition-all active:scale-95"
                                         >
-                                            Edit Profile
+                                            ✏️ Edit Profile
                                         </button>
                                         <button
                                             onClick={() => setShowPasswordModal(true)}
                                             className="flex-1 py-4 border-2 border-gray-100 text-gray-500 font-black rounded-2xl hover:bg-gray-50 transition-all active:scale-95"
                                         >
-                                            Change Password
+                                            🔒 Change Password
                                         </button>
                                     </>
                                 )}
@@ -307,7 +414,6 @@ const Profile = () => {
                             </div>
                         </div>
 
-                        {/* Event List Simulation */}
                         <div className="space-y-4">
                             {history.length === 0 ? (
                                 <p className="text-gray-400 text-center py-4">No participation history found.</p>

@@ -1,6 +1,5 @@
 package com.company.event.user;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,4 +20,8 @@ public class UserResponse {
     private String fatherName;
     private String course;
     private String branch;
+    private String college;
+    private String rollNumber;
+    private String academicYear;
+    private String phone;
 }
