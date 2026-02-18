@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { apiService } from '../services/api';
 import { toast } from 'react-toastify';
 
-const EventCard = ({ event, isAdmin, onDelete, isFavorite, onToggleFavorite, viewMode = 'grid' }) => {
+const EventCard = ({ event, isAdmin, onDelete, isFavorite, onToggleFavorite, viewMode = 'grid', timeLeft }) => {
     const { id, title, type, startTime, endTime, category } = event;
 
     const formatDate = (dateString) => {
@@ -52,23 +52,23 @@ const EventCard = ({ event, isAdmin, onDelete, isFavorite, onToggleFavorite, vie
 
     if (viewMode === 'list') {
         return (
-            <div className="group relative theme-bg-secondary rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all border border-gray-100 flex items-center p-4 gap-6 animate-fade-in">
-                <div className={`w-2 h-24 rounded-full ${isMcq ? 'bg-blue-500' : 'bg-purple-500'}`}></div>
+            <div className="group relative bg-bg-secondary rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all border border-card-border flex items-center p-4 gap-6 animate-fade-in hover:bg-bg-tertiary/50">
+                <div className={`w-2 h-24 rounded-full ${isMcq ? 'bg-accent-primary' : 'bg-accent-secondary'}`}></div>
 
                 <div className="flex-grow">
                     <div className="flex items-center space-x-3 mb-1">
-                        <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${isMcq ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400'}`}>
+                        <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${isMcq ? 'bg-blue-500/10 text-blue-500' : 'bg-purple-500/10 text-purple-500'}`}>
                             {type || (isMcq ? 'MCQ' : 'Coding')}
                         </span>
-                        <span className="text-xs theme-text-secondary font-medium">{formatDate(startTime)}</span>
+                        <span className="text-xs text-text-secondary font-medium">{formatDate(startTime)}</span>
                     </div>
-                    <h3 className="text-lg font-bold theme-text-primary group-hover:text-blue-600 transition-colors">{title}</h3>
+                    <h3 className="text-lg font-bold text-text-primary group-hover:text-accent-primary transition-colors">{title}</h3>
                 </div>
 
                 <div className="flex items-center space-x-4">
                     <button
                         onClick={(e) => { e.preventDefault(); onToggleFavorite && onToggleFavorite(); }}
-                        className={`p-2 rounded-full transition-all ${isFavorite ? 'text-red-500 bg-red-50' : 'theme-text-secondary hover:text-red-400 theme-bg-tertiary'}`}
+                        className={`p-2 rounded-full transition-all ${isFavorite ? 'text-red-500 bg-red-500/10' : 'text-text-secondary hover:text-red-400 hover:bg-bg-tertiary'}`}
                     >
                         <svg className="w-6 h-6" fill={isFavorite ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -77,7 +77,7 @@ const EventCard = ({ event, isAdmin, onDelete, isFavorite, onToggleFavorite, vie
 
                     <Link
                         to={`/event/${id}?category=${category}`}
-                        className={`px-6 py-2 rounded-lg font-bold text-sm transition-all ${isMcq ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-purple-600 hover:bg-purple-700 text-white'}`}
+                        className={`px-6 py-2 rounded-lg font-bold text-sm transition-all text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 ${isMcq ? 'bg-gradient-to-r from-blue-600 to-blue-500' : 'bg-gradient-to-r from-purple-600 to-purple-500'}`}
                     >
                         View
                     </Link>
@@ -87,67 +87,84 @@ const EventCard = ({ event, isAdmin, onDelete, isFavorite, onToggleFavorite, vie
     }
 
     return (
-        <div className="group relative theme-bg-secondary rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col h-full transform hover:-translate-y-2">
+        <div className="group relative bg-bg-secondary rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-card-border flex flex-col h-full transform hover:-translate-y-2 card-hover">
             {/* Visual Header */}
-            <div className={`h-32 bg-gradient-to-br ${isMcq ? 'from-blue-600 to-indigo-700' : 'from-purple-600 to-fuchsia-700'} p-6 relative`}>
-                <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-white uppercase tracking-widest border border-white/30">
-                    {type || (isMcq ? 'MCQ' : 'Coding')}
-                </div>
-                <div className="mt-4 pr-8">
-                    <h3 className="text-xl font-black text-white line-clamp-1 group-hover:drop-shadow-lg transition-all">
-                        {title}
-                    </h3>
+            <div className={`h-40 bg-gradient-to-br ${isMcq ? 'from-blue-600 via-indigo-700 to-indigo-800' : 'from-purple-600 via-purple-700 to-fuchsia-800'} p-6 relative overflow-hidden`}>
+                {/* Category Badge */}
+                <div className="absolute top-4 left-4 z-20">
+                    <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black text-white uppercase tracking-widest border border-white/20 shadow-sm">
+                        {type || (isMcq ? 'MCQ' : 'Coding')}
+                    </span>
                 </div>
 
-                {/* Favorite Button */}
-                <button
-                    onClick={(e) => { e.preventDefault(); onToggleFavorite && onToggleFavorite(); }}
-                    className="absolute top-4 right-16 p-1.5 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-md transition-all text-white border border-white/30"
-                >
-                    <svg className="w-5 h-5" fill={isFavorite ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                </button>
+                {/* Favorite Button - Repositioned to avoid overlap */}
+                <div className="absolute top-4 right-4 z-20">
+                    <button
+                        onClick={(e) => { e.preventDefault(); onToggleFavorite && onToggleFavorite(); }}
+                        className={`p-2 rounded-full backdrop-blur-md transition-all border border-white/20 shadow-sm ${isFavorite ? 'bg-red-500 text-white border-red-400' : 'bg-white/20 text-white hover:bg-white/40'
+                            }`}
+                    >
+                        <svg className="w-5 h-5" fill={isFavorite ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                    </button>
+                </div>
+
+                {/* Title */}
+                <div className="absolute bottom-6 left-6 right-6 z-10">
+                    <h3 className="text-2xl font-black text-white line-clamp-2 leading-tight group-hover:drop-shadow-lg transition-all">
+                        {title}
+                    </h3>
+                    {timeLeft && (
+                        <div className="mt-2 inline-flex items-center gap-2 bg-yellow-400/90 text-black text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider animate-pulse">
+                            <span className="w-1.5 h-1.5 bg-black rounded-full"></span>
+                            Starts in: {timeLeft}
+                        </div>
+                    )}
+                </div>
+
                 {/* Abstract pattern */}
-                <div className="absolute bottom-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl translate-y-1/2 translate-x-1/2"></div>
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+                <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-black/20 rounded-full blur-2xl"></div>
+                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
             </div>
 
             {/* Content */}
-            <div className="p-6 flex-grow flex flex-col">
+            <div className="p-6 flex-grow flex flex-col bg-bg-secondary transition-colors duration-300">
                 <div className="space-y-4 flex-grow">
                     {/* Timeline */}
                     <div className="flex items-start space-x-3">
-                        <div className={`p-2 rounded-lg ${isMcq ? 'theme-bg-tertiary text-blue-600' : 'theme-bg-tertiary text-purple-600'}`}>
+                        <div className={`p-2 rounded-lg bg-bg-tertiary transition-colors ${isMcq ? 'text-accent-primary' : 'text-accent-secondary'}`}>
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                         </div>
                         <div>
-                            <p className="text-[10px] font-black theme-text-secondary uppercase tracking-widest leading-none mb-1">Starts</p>
-                            <p className="text-sm font-bold theme-text-primary">{formatDate(startTime)}</p>
+                            <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest leading-none mb-1">Starts</p>
+                            <p className="text-sm font-bold text-text-primary">{formatDate(startTime)}</p>
                         </div>
                     </div>
 
                     <div className="flex items-start space-x-3">
-                        <div className={`p-2 rounded-lg ${isMcq ? 'theme-bg-tertiary text-blue-600' : 'theme-bg-tertiary text-purple-600'}`}>
+                        <div className={`p-2 rounded-lg bg-bg-tertiary transition-colors ${isMcq ? 'text-accent-primary' : 'text-accent-secondary'}`}>
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
                         <div>
-                            <p className="text-[10px] font-black theme-text-secondary uppercase tracking-widest leading-none mb-1">Ends</p>
-                            <p className="text-sm font-bold theme-text-primary">{formatDate(endTime)}</p>
+                            <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest leading-none mb-1">Ends</p>
+                            <p className="text-sm font-bold text-text-primary">{formatDate(endTime)}</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Footer Actions */}
-                <div className="mt-8 pt-6 border-t border-gray-50 flex items-center justify-between">
+                <div className="mt-8 pt-6 border-t border-card-border flex items-center justify-between">
                     <Link
                         to={`/event/${id}?category=${category}`}
-                        className={`px-6 py-2.5 rounded-xl font-bold transition-all shadow-md active:scale-95 ${isMcq
-                            ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-100'
-                            : 'bg-purple-600 text-white hover:bg-purple-700 shadow-purple-100'
+                        className={`px-6 py-2.5 rounded-xl font-bold transition-all shadow-md active:scale-95 text-white ${isMcq
+                            ? 'bg-gradient-to-r from-blue-600 to-blue-500 hover:shadow-blue-500/30'
+                            : 'bg-gradient-to-r from-purple-600 to-purple-500 hover:shadow-purple-500/30'
                             }`}
                     >
                         Enter {isMcq ? 'Quiz' : 'Contest'}
@@ -157,7 +174,7 @@ const EventCard = ({ event, isAdmin, onDelete, isFavorite, onToggleFavorite, vie
                         <div className="flex items-center space-x-2">
                             <Link
                                 to={`/event/${id}/analytics`}
-                                className="p-2.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"
+                                className="p-2.5 text-text-secondary hover:text-status-success hover:bg-status-success/10 rounded-xl transition-all"
                                 title="Analytics"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,7 +183,7 @@ const EventCard = ({ event, isAdmin, onDelete, isFavorite, onToggleFavorite, vie
                             </Link>
                             <Link
                                 to={`/edit/${id}?category=${category}`}
-                                className="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                                className="p-2.5 text-text-secondary hover:text-accent-primary hover:bg-accent-primary/10 rounded-xl transition-all"
                                 title="Edit"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -175,7 +192,7 @@ const EventCard = ({ event, isAdmin, onDelete, isFavorite, onToggleFavorite, vie
                             </Link>
                             <button
                                 onClick={handleDelete}
-                                className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                                className="p-2.5 text-text-secondary hover:text-status-error hover:bg-status-error/10 rounded-xl transition-all"
                                 title="Delete"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

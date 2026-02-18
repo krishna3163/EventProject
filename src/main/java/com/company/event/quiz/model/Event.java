@@ -26,8 +26,11 @@ public class Event {
 
     private Boolean attendanceProcessed = false;
 
-
     private Integer totalMarks;
+
+    private String organizationId;
+
+    private String imageUrl;
 
     private String status; // UPCOMING, LIVE, COMPLETED
 }

@@ -24,6 +24,11 @@ public class ContestController {
         return ResponseEntity.ok(contestService.getAllContests());
     }
 
+    @GetMapping("/getOrgContests/{orgId}")
+    public ResponseEntity<?> getOrgContests(@PathVariable String orgId) {
+        return ResponseEntity.ok(contestService.getOrgContests(orgId));
+    }
+
     @GetMapping("/getById/{id}")
     public ResponseEntity<?> getContest(@PathVariable String id) {
 
@@ -46,8 +51,7 @@ public class ContestController {
     @PutMapping("/update/{id}")
     public ResponseEntity<ContestResponse> updateContest(
             @PathVariable String id,
-            @RequestBody ContestRequest request
-    ) {
+            @RequestBody ContestRequest request) {
         return ResponseEntity.ok(contestService.updateContest(request, id));
     }
 }

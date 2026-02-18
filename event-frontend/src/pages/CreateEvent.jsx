@@ -12,8 +12,13 @@ const CreateEvent = () => {
         setIsLoading(true);
         try {
             if (category === 'mcq') {
-                await apiService.quiz.create(data);
+                const response = await apiService.quiz.create(data);
                 toast.success('MCQ Quiz created successfully!');
+                const createdEvent = response.data;
+                if (createdEvent && createdEvent.id) {
+                    navigate(`/event/${createdEvent.id}/questions`);
+                    return;
+                }
             } else {
                 await apiService.contest.create(data);
                 toast.success('Coding Contest created successfully!');

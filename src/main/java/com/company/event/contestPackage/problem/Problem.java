@@ -1,6 +1,5 @@
 package com.company.event.contestPackage.problem;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +18,9 @@ public class Problem {
     @Id
     private String id;
     private String title;
+    private String organizationId;
     private String description;
+    private String imageUrl;
     private String difficulty;
     private List<TestCase> testCases;
 }

@@ -18,8 +18,8 @@ const ManageQuestions = () => {
 
     const fetchQuestions = async () => {
         try {
-            const response = await apiService.quiz.getById(eventId);
-            setQuestions(response.data.questions || []);
+            const response = await apiService.quiz.getQuestions(eventId);
+            setQuestions(response.data || []);
             setLoading(false);
         } catch (error) {
             console.error('Error fetching questions:', error);
@@ -40,15 +40,7 @@ const ManageQuestions = () => {
             fetchQuestions();
         } catch (error) {
             console.error('Delete error:', error);
-
-            // TEMPORARY: Delete from localStorage for Demo Mode
-            const localKey = `demo_questions_${eventId}`;
-            const existing = JSON.parse(localStorage.getItem(localKey) || '[]');
-            const filtered = existing.filter(q => q.id !== qId);
-            localStorage.setItem(localKey, JSON.stringify(filtered));
-
-            toast.success('Question removed (Demo Mode)');
-            fetchQuestions();
+            toast.error('Failed to delete question');
         }
     };
 
@@ -69,14 +61,7 @@ const ManageQuestions = () => {
             fetchQuestions();
         } catch (error) {
             console.error('Import error:', error);
-            const localKey = `demo_questions_${eventId}`;
-            const existing = JSON.parse(localStorage.getItem(localKey) || '[]');
-            const newQuestions = parsedData.map(q => ({ ...q, id: `q_${Math.random().toString(36).substr(2, 9)}` }));
-            localStorage.setItem(localKey, JSON.stringify([...existing, ...newQuestions]));
-            toast.success(`Imported ${parsedData.length} questions (Demo Mode)!`);
-            setShowBulkModal(false);
-            setBulkData('');
-            fetchQuestions();
+            toast.error('Import failed');
         }
     };
 
@@ -84,16 +69,15 @@ const ManageQuestions = () => {
 
     return (
         <div className="max-w-6xl mx-auto py-8 px-4 animate-fade-in">
-            {/* ... rest of the code ... */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
                 <div>
                     <h1 className="text-4xl font-black text-gray-800 mb-2">Question Studio</h1>
-                    <p className="text-gray-500 font-medium">Manage and organize questions for your MCQ event</p>
+                    <p className="text-gray-500 font-medium tracking-tight">Manage and organize questions for your MCQ event</p>
                 </div>
                 <div className="flex space-x-4">
                     <button
                         onClick={() => setShowBulkModal(true)}
-                        className="px-6 py-3 rounded-xl font-bold bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all flex items-center space-x-2"
+                        className="px-6 py-3 rounded-xl font-bold bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all flex items-center space-x-2 shadow-sm"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -112,22 +96,31 @@ const ManageQuestions = () => {
                 </div>
             </div>
 
-            {/* Questions List */}
             <div className="space-y-6">
                 {questions.length > 0 ? (
                     questions.map((q, idx) => (
-                        <div key={idx} className="card p-8 group hover:border-blue-500 transition-all glass-effect border-gray-100">
+                        <div key={idx} className="card p-8 group hover:border-blue-500 transition-all glass-effect border-gray-100 shadow-xl">
                             <div className="flex justify-between items-start mb-6">
                                 <div className="flex items-center space-x-4">
-                                    <span className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black">
+                                    <span className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-white shadow-lg ${q.isMultipleChoice ? 'bg-purple-600' : 'bg-blue-600'}`}>
                                         {idx + 1}
                                     </span>
-                                    <h3 className="text-xl font-bold text-gray-800">{q.questionText}</h3>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-gray-800">{q.questionText}</h3>
+                                        <div className="flex gap-3 mt-1">
+                                            <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${q.isMultipleChoice ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'}`}>
+                                                {q.isMultipleChoice ? 'Multiple Select' : 'Single Choice'}
+                                            </span>
+                                            <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md bg-gray-100 text-gray-400">
+                                                {q.marks} Marks
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="opacity-0 group-hover:opacity-100 transition-opacity flex space-x-2">
                                     <button
                                         onClick={() => deleteQuestion(q.id)}
-                                        className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                                        className="p-2 text-gray-400 hover:text-red-600 transition-colors bg-red-50 rounded-lg"
                                     >
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -137,19 +130,24 @@ const ManageQuestions = () => {
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {q.options.map((opt, oIdx) => (
-                                    <div key={oIdx} className={`p-4 rounded-2xl border-2 flex items-center justify-between ${opt === q.correctAnswer
-                                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                                        : 'border-gray-50 bg-gray-50 text-gray-600'
-                                        }`}>
-                                        <span className="font-bold">{String.fromCharCode(65 + oIdx)}. {opt}</span>
-                                        {opt === q.correctAnswer && (
-                                            <svg className="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                            </svg>
-                                        )}
-                                    </div>
-                                ))}
+                                {q.options.map((opt, oIdx) => {
+                                    const isCorrect = q.correctOptions?.includes(oIdx) || opt === q.correctAnswer;
+                                    return (
+                                        <div key={oIdx} className={`p-4 rounded-2xl border-2 flex items-center justify-between transition-all ${isCorrect
+                                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700 shadow-sm'
+                                            : 'border-gray-50 bg-gray-50 text-gray-600'
+                                            }`}>
+                                            <span className="font-bold">{String.fromCharCode(65 + oIdx)}. {opt}</span>
+                                            {isCorrect && (
+                                                <div className="bg-emerald-500 rounded-full p-0.5">
+                                                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                    </svg>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                     ))

@@ -1,240 +1,61 @@
-# ⚡ EventHub — College Event Management & Coding Contest Platform
+# Event Management & Coding Platform 🚀
 
-> A modern, full-stack platform for managing college events, MCQ quizzes, and coding contests — with real-time leaderboards, analytics, PDF exports, and 4 stunning themes.
+A comprehensive platform for managing coding contests, quizzes, and events with robust authentication and real-time features.
 
-> 🚧 **Status:** Currently in the **Developer Phase** — actively improving security, features, and code quality.
->
-> 🌐 **Live Preview:** [View Demo](https://event-project-4kaj2qtva-krishna3163s-projects.vercel.app/)
+## 🌟 Key Features
 
-![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5-6DB33F?logo=springboot)
-![MongoDB](https://img.shields.io/badge/MongoDB-7.0-47A248?logo=mongodb)
-![JWT](https://img.shields.io/badge/Auth-JWT-000000?logo=jsonwebtokens)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker)
+### 🔐 Advanced Authentication
+- **Firebase Integration**: Supports Google, Phone (OTP), and Anonymous login.
+- **Auto-Sync**: New users from Firebase are automatically registered in MongoDB.
+- **Role-Based Access**: dedicated dashboards for Students, Organization Admins, and Super Admins.
 
----
+### 🏆 Contests & Quizzes
+- **Live Coding Arena**: Real-time code execution with support for Java, Python, C++, and Node.js.
+- **Secure Quiz Zone**: Fullscreen enforcement and tab-switch detection for fair exams.
+- **Real-Time Timers**: Countdown timers on dashboards and inside contests.
+- **Leaderboards**: Competitive ranking system.
 
-## ✨ Features
+### 📊 Performance Tracking
+- **Dual Database Architecture**: 
+  - **MongoDB**: For core user data and event management.
+  - **Supabase**: For efficient analytics and participation history.
+- **Student Dashboard**: Track your progress, recent scores, and upcoming events.
 
-### 🎨 Themes
-Switch between **4 built-in themes** instantly.
-> ⚠️ **Note:** Themes are currently in the **Developer Phase** and may contain layout bugs. We're actively working on fixing theme-specific CSS inconsistencies.
-
-| ☀️ Light | 🌙 Dark | 🌌 Midnight | 🍃 Forest |
-|----------|---------|-------------|-----------|
-
-### 👤 For Participants
-- **Dashboard** with filters (Live / Upcoming / Completed), search, grid/list toggle
-- **Favorites** — bookmark your favorite events
-- **Live countdown timers** before contest starts
-- **MCQ quizzes** with timed sessions and auto-submission
-- **Coding arena** with multi-language support (Python, Java, C, C++)
-- **Leaderboard** with real-time ranking
-- **Beautiful profile page** with activity tracking
-
-### 🛠️ For Admins
-- **Event CRUD** — create, edit, delete MCQ and coding events
-- **Problem Studio** — design coding problems with test cases and JSON import
-- **Analytics dashboard** — per-event statistics, scores, participation rates
-- **PDF exports** — downloadable analytics reports
-- **Certificate management**
-
-### 🔐 Security
-- **JWT-based authentication** (no more insecure Basic Auth)
-- **Role-based authorization** (ADMIN / USER)
-- **BCrypt password hashing**
-- **Protected API endpoints** with `@PreAuthorize`
-- **Environment variable configuration** — no hardcoded secrets
-
----
-
-## 📁 Project Structure
-
-```
-EventHub/
-├── README.md
-├── PROJECT_AUDIT.md              # Full-stack audit document
-├── docker-compose.yml            # Full stack deployment
-│
-├── EventProject-main/            # ☕ Spring Boot Backend
-│   ├── pom.xml
-│   ├── Dockerfile
-│   ├── .env.example
-│   └── src/main/java/com/company/event/
-│       ├── security/             # JWT, Auth, Security config
-│       ├── user/                 # User domain
-│       ├── quiz/                 # MCQ events, questions, analytics
-│       └── contestPackage/       # Coding contests, problems, submissions
-│
-└── event-frontend/               # ⚛️ React + Vite Frontend
-    ├── Dockerfile
-    ├── .env.example
-    └── src/
-        ├── components/           # Navbar, EventCard, EventForm, Loader
-        ├── pages/                # Dashboard, Login, Signup, Profile, etc.
-        ├── context/              # AuthContext (JWT), ThemeContext
-        └── services/             # API service layer (axios)
-```
-
----
-
-## 🚀 Quick Start
+## 🚀 Getting Started
 
 ### Prerequisites
-- **Node.js** 18+ and **npm**
-- **Java** 21 (JDK)
-- **MongoDB** 7.0 (running locally or via Docker)
+- Node.js (v18+)
+- Java JDK 17+
+- MongoDB (Local or Atlas)
+- Firebase Project Configured
 
-### Option 1: Run Locally
+### Running the Application
 
-**1. Start MongoDB** (if not running already):
-```bash
-# Using Docker (recommended)
-docker run -d --name mongodb -p 27017:27017 mongo:7.0
+1. **Backend (Spring Boot)**
+   ```bash
+   cd EventProject-main
+   ./mvnw.cmd spring-boot:run
+   ```
+   Server runs on: `http://localhost:8080`
 
-# Or start your local MongoDB service
-```
+2. **Frontend (React + Vite)**
+   ```bash
+   cd event-frontend
+   npm run dev
+   ```
+   Client runs on: `http://localhost:3001` (or 5173)
 
-**2. Start the Backend:**
-```bash
-cd EventProject-main
-.\mvnw.cmd spring-boot:run        # Windows
-./mvnw spring-boot:run             # Mac/Linux
-```
-Backend runs at: `http://localhost:8080`
-Swagger UI: `http://localhost:8080/swagger-ui.html`
+## 🔑 Demo Credentials
 
-> ℹ️ On first startup, a default admin user is created with username `admin` and password `admin123`. You can change these via environment variables.
+| Role | Email | Password |
+|------|-------|----------|
+| **Admin** | `admin@eventhub.com` | `admin123` |
+| **Student** | `student@demo.com` | `student123` |
 
-**3. Start the Frontend:**
-```bash
-cd event-frontend
-npm install
-npm run dev
-```
-Frontend runs at: `http://localhost:3000`
-
-### Option 2: Docker Compose (Full Stack)
-
-```bash
-docker-compose up --build
-```
-This starts MongoDB + Backend + Frontend automatically.
-
-| Service   | URL                          |
-|-----------|------------------------------|
-| Frontend  | http://localhost:3000         |
-| Backend   | http://localhost:8080         |
-| Swagger   | http://localhost:8080/swagger-ui.html |
-| MongoDB   | localhost:27017              |
+## 🛠️ Tech Stack
+- **Frontend**: React, Vite, TailwindCSS, Monaco Editor, Firebase Auth
+- **Backend**: Spring Boot, Spring Security, MongoDB, Supabase
+- **DevOps**: Docker ready
 
 ---
-
-## ⚙️ Configuration
-
-All secrets and configuration are driven by **environment variables** (with sensible defaults for development):
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `MONGODB_URI` | `mongodb://localhost:27017/mydb` | MongoDB connection URI |
-| `SERVER_PORT` | `8080` | Backend server port |
-| `JWT_SECRET` | *(dev default)* | Base64-encoded HMAC-SHA256 secret key |
-| `JWT_EXPIRATION` | `86400000` | Token validity (24h in ms) |
-| `ADMIN_USERNAME` | `admin` | Default admin username |
-| `ADMIN_PASSWORD` | `admin123` | Default admin password |
-| `ADMIN_EMAIL` | `admin@eventhub.com` | Default admin email |
-| `JDOODLE_CLIENT_ID` | `dummy_id` | JDoodle API client ID |
-| `JDOODLE_CLIENT_SECRET` | `dummy_secret` | JDoodle API client secret |
-| `VITE_API_BASE_URL` | `http://localhost:8080` | Backend URL for frontend |
-
-See `.env.example` files in both `EventProject-main/` and `event-frontend/`.
-
----
-
-## 🔑 API Documentation
-
-### Authentication (Powered by Supabase)
-This project uses **Supabase Auth** for user management. Supabase handles login, registration, email verification, and password resets. The Spring Boot backend acts as a **Resource Server**, validating Supabase JWTs.
-
-| Method | Path | Description | Provider |
-|--------|------|-------------|----------|
-| `POST` | `/api/auth/login` | Handled by Supabase Client | Supabase |
-| `POST` | `/api/auth/register` | Handled by Supabase Client | Supabase |
-| `POST` | `/api/users/sync` | Syncs Supabase user to MongoDB | Backend |
-| `GET`  | `/api/auth/me` | DEPRECATED (Use user state) | - |
-
-### Event Endpoints
-| Method | Path | Description | Auth |
-|--------|------|-------------|------|
-| `GET` | `/api/events/getAllEvent` | List all events | Bearer |
-| `GET` | `/api/events/getEventById/{id}` | Get event details | Bearer |
-| `POST` | `/api/events/createEvent` | Create event | Admin |
-| `PUT` | `/api/events/updateEvent/{id}` | Update event | Admin |
-| `DELETE` | `/api/events/deleteEvent/{id}` | Delete event | Admin |
-
-### Contest Endpoints
-| Method | Path | Description | Auth |
-|--------|------|-------------|------|
-| `GET` | `/contest/getAll` | List all contests | Bearer |
-| `POST` | `/contest/insert` | Create contest | Admin |
-| `GET` | `/leaderboard/{contestId}` | Get leaderboard | Bearer |
-| `POST` | `/submission` | Submit code | Bearer |
-
-> 📖 Full interactive docs available at `/swagger-ui.html` when backend is running.
-
----
-
-## 🧪 Tech Stack
-
-| Layer | Technology |
-|-------|------------|
-| **Frontend** | React 18, Vite, Tailwind CSS, Supabase JS |
-| **Backend** | Spring Boot 3.5, Spring Security Resource Server |
-| **Auth** | Supabase Auth (JWT), OAuth2 Resource Server |
-| **Database** | MongoDB 7.0 (Atlas) |
-| **Code Execution** | JDoodle API |
-| **PDF Generation** | OpenPDF |
-| **API Docs** | SpringDoc OpenAPI (Swagger UI) |
-| **DevOps** | Docker, Docker Compose |
-
----
-
-## 📸 Screenshots
-
-### Dashboard
-![Dashboard](screenshots/Dashboard.png)
-
-### Create Event
-![Create Event](screenshots/create.png)
-
-### Analytics
-![Analytics](screenshots/analytic.png)
-
-### Profile
-![Profile](screenshots/profile.png)
-
----
-
-## 🤝 Contributing
-
-We ❤️ contributions! Whether you're fixing a bug, improving themes, or adding new features, your help is welcome.
-
-**We are specifically looking for help with:**
-- 🐛 **Bug Hunting:** Finding and reporting edge-case bugs.
-- 🎨 **Theme Fixes:** Resolving CSS inconsistencies in the 4 developer-phase themes.
-- 🚀 **Feature Enhancements:** Improving the coding arena and analytics.
-
-**How to contribute:**
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
-**Developed with ❤️ and a lot of caffeine by [Team CodeNexus](https://github.com/krishna3163)**
+*Built with ❤️ for coders.*

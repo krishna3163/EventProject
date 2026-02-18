@@ -1,52 +1,95 @@
--- Supabase SQL Setup for EventProject
--- This script sets up a profiles table and triggers to sync user data.
--- Note: The application also syncs data to MongoDB via the /api/users/sync endpoint.
+-- ═══════════════════════════════════════════════════════════════
+-- SUPABASE SETUP SQL — EventHub Platform
+-- Run this in Supabase SQL Editor (https://app.supabase.com)
+-- ═══════════════════════════════════════════════════════════════
 
--- 1. Create a table for public profiles
-CREATE TABLE IF NOT EXISTS public.profiles (
-  id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL PRIMARY KEY,
-  email TEXT UNIQUE NOT NULL,
-  first_name TEXT,
-  last_name TEXT,
-  role TEXT DEFAULT 'USER' CHECK (role IN ('USER', 'ADMIN')),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+-- 1. PARTICIPATIONS TABLE
+-- Tracks every time a user participates in a quiz or contest
+CREATE TABLE IF NOT EXISTS participations (
+    id              BIGSERIAL PRIMARY KEY,
+    user_id         TEXT NOT NULL,          -- MongoDB User ID
+    user_email      TEXT,
+    user_name       TEXT,
+    event_id        TEXT NOT NULL,          -- MongoDB Event/Contest ID
+    event_title     TEXT,
+    event_type      TEXT DEFAULT 'QUIZ',    -- 'QUIZ' or 'CONTEST'
+    org_id          TEXT,                   -- MongoDB Organization ID
+    score           INTEGER DEFAULT 0,
+    max_score       INTEGER DEFAULT 100,
+    rank            INTEGER,
+    participated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(user_id, event_id)               -- One entry per user per event
 );
 
--- 2. Enable Row Level Security (RLS)
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+-- 2. INDEXES for fast lookups
+CREATE INDEX IF NOT EXISTS idx_participations_user_id   ON participations(user_id);
+CREATE INDEX IF NOT EXISTS idx_participations_event_id  ON participations(event_id);
+CREATE INDEX IF NOT EXISTS idx_participations_org_id    ON participations(org_id);
+CREATE INDEX IF NOT EXISTS idx_participations_score     ON participations(score DESC);
 
--- 3. Create security policies
--- Allow everyone to view profiles (or restrict as needed)
-CREATE POLICY "Public profiles are viewable by everyone." ON public.profiles
-  FOR SELECT USING (true);
+-- 3. ROW LEVEL SECURITY (RLS) — allow anon reads, authenticated writes
+ALTER TABLE participations ENABLE ROW LEVEL SECURITY;
 
--- Allow users to update their own profile
-CREATE POLICY "Users can update own profile." ON public.profiles
-  FOR UPDATE USING (auth.uid() = id);
+-- Allow anyone to read (for leaderboards)
+CREATE POLICY "Allow public read" ON participations
+    FOR SELECT USING (true);
 
--- 4. Create a function to handle new user signups automatically
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO public.profiles (id, email, first_name, last_name, role)
-  VALUES (
-    new.id,
-    new.email,
-    COALESCE(new.raw_user_meta_data->>'firstName', ''),
-    COALESCE(new.raw_user_meta_data->>'lastName', ''),
-    CASE 
-      WHEN new.email = 'admin@eventhub.com' THEN 'ADMIN'
-      ELSE COALESCE(new.raw_user_meta_data->>'role', 'USER')
-    END
-  );
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+-- Allow authenticated users to insert/update their own records
+CREATE POLICY "Allow authenticated insert" ON participations
+    FOR INSERT WITH CHECK (true);
 
--- 5. Set up a trigger for the handle_new_user function
--- This will run every time a user is created in auth.users
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+CREATE POLICY "Allow authenticated update" ON participations
+    FOR UPDATE USING (true);
+
+-- 4. SAMPLE DATA (optional — remove in production)
+-- INSERT INTO participations (user_id, user_email, user_name, event_id, event_title, event_type, score, max_score)
+-- VALUES
+--   ('user1', 'alice@demo.com', 'Alice Smith', 'event1', 'Java Basics Quiz', 'QUIZ', 85, 100),
+--   ('user2', 'bob@demo.com', 'Bob Jones', 'event1', 'Java Basics Quiz', 'QUIZ', 72, 100),
+--   ('user1', 'alice@demo.com', 'Alice Smith', 'contest1', 'Coding Challenge', 'CONTEST', 95, 100);
+
+-- 5. USEFUL VIEWS
+
+-- Leaderboard view per event
+CREATE OR REPLACE VIEW event_leaderboard AS
+SELECT
+    event_id,
+    event_title,
+    user_id,
+    user_name,
+    user_email,
+    score,
+    max_score,
+    ROUND((score::DECIMAL / NULLIF(max_score, 0)) * 100, 1) AS percentage,
+    RANK() OVER (PARTITION BY event_id ORDER BY score DESC) AS rank,
+    participated_at
+FROM participations;
+
+-- User summary view
+CREATE OR REPLACE VIEW user_summary AS
+SELECT
+    user_id,
+    user_name,
+    user_email,
+    COUNT(*) AS total_participations,
+    COUNT(*) FILTER (WHERE event_type = 'QUIZ') AS quiz_count,
+    COUNT(*) FILTER (WHERE event_type = 'CONTEST') AS contest_count,
+    ROUND(AVG(score), 1) AS avg_score,
+    SUM(score) AS total_score,
+    MIN(participated_at) AS first_participation,
+    MAX(participated_at) AS last_participation
+FROM participations
+GROUP BY user_id, user_name, user_email;
+
+-- Organization analytics view
+CREATE OR REPLACE VIEW org_analytics AS
+SELECT
+    org_id,
+    COUNT(*) AS total_participations,
+    COUNT(DISTINCT user_id) AS unique_participants,
+    COUNT(DISTINCT event_id) AS events_with_participation,
+    ROUND(AVG(score), 1) AS avg_score,
+    MAX(score) AS highest_score
+FROM participations
+WHERE org_id IS NOT NULL
+GROUP BY org_id;

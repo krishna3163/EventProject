@@ -8,4 +8,6 @@ import java.util.List;
 public interface McqQuestionRepository extends MongoRepository<McqQuestion, String> {
 
     List<McqQuestion> findByEventId(String eventId);
+
+    List<McqQuestion> findByOrganizationId(String organizationId);
 }

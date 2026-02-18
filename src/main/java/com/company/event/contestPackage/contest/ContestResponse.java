@@ -15,4 +15,5 @@ public class ContestResponse {
     private Instant startTime;
     private Instant endTime;
     private List<String> problemIds;
+    private String organizationId;
 }

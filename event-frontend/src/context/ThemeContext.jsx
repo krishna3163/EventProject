@@ -9,40 +9,44 @@ export const ThemeProvider = ({ children }) => {
         return savedTheme || 'light';
     });
 
-    // Preset themes (optional, can just be light/dark for now but structure allows expansion)
-    // For now we will stick to 'light' and 'dark' classes, but maybe 'blue-theme' etc in future
-    // actually user asked for "different colour themes". 
-    // Let's implement 'light', 'dark', 'midnight', 'nature'.
+    const themes = [
+        { id: 'light', name: 'Light', icon: '☀️', type: 'light' },
+        { id: 'dark', name: 'Dark', icon: '🌙', type: 'dark' },
+        { id: 'glass', name: 'Glass', icon: '🧊', type: 'light' },
+        { id: 'cyberpunk', name: 'Cyberpunk', icon: '🤖', type: 'dark' },
+        { id: 'classic', name: 'Classic', icon: '👔', type: 'light' },
+    ];
 
     useEffect(() => {
         const root = window.document.documentElement;
 
-        // Remove old themes
-        root.classList.remove('light', 'dark', 'midnight', 'nature');
+        // Remove old theme classes (except 'dark' which is managed separately below)
+        themes.forEach(t => {
+            if (t.id !== 'dark') root.classList.remove(t.id);
+        });
 
-        // Add new theme
-        root.classList.add(theme);
+        // Also remove 'dark' initially to reset state
+        root.classList.remove('dark');
 
-        // Intelligently add 'dark' class for dark-based themes to enable Tailwind utilities
-        if (theme === 'dark' || theme === 'midnight') {
-            root.classList.add('dark');
-        } else {
-            root.classList.remove('dark');
+        // Add current theme class
+        // Example: class="cyberpunk dark"
+        if (theme !== 'light') {
+            root.classList.add(theme);
         }
 
-        // Persist
+        // Manage 'dark' class for Tailwind utilities
+        const currentThemeObj = themes.find(t => t.id === theme);
+        if (currentThemeObj?.type === 'dark') {
+            root.classList.add('dark');
+        }
+
         localStorage.setItem('theme', theme);
     }, [theme]);
 
     const value = {
         theme,
         setTheme,
-        themes: [
-            { id: 'light', name: 'Light', icon: '☀️' },
-            { id: 'dark', name: 'Dark', icon: '🌙' },
-            { id: 'midnight', name: 'Midnight', icon: '🌌' },
-            { id: 'nature', name: 'Forest', icon: '🍃' },
-        ]
+        themes
     };
 
     return (

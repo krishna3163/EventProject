@@ -14,13 +14,19 @@ import java.util.List;
 public class SubmissionController {
     private final SubmissionService submissionService;
 
+    @PostMapping("/run")
+    public ResponseEntity<?> runCode(
+            @RequestBody SubmissionRequest submissionRequest) {
+        return ResponseEntity.ok(
+                submissionService.runCode(submissionRequest));
+    }
+
     @PostMapping
     public ResponseEntity<SubmissionResponse> submitCode(
             @RequestBody SubmissionRequest submissionRequest) {
 
         return ResponseEntity.ok(
-                submissionService.submitCode(submissionRequest)
-        );
+                submissionService.submitCode(submissionRequest));
     }
 
     @GetMapping
@@ -31,28 +37,24 @@ public class SubmissionController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getSubmissionsById(@PathVariable String id) {
         return ResponseEntity.ok(
-                submissionService.getSubmissionById(id)
-        );
+                submissionService.getSubmissionById(id));
     }
 
     @GetMapping("/userId/{userId}")
     public ResponseEntity<?> getSubmissionsByUserId(@PathVariable String userId) {
         return ResponseEntity.ok(
-                submissionService.getSubmissionByUserId(userId)
-        );
+                submissionService.getSubmissionByUserId(userId));
     }
 
     @GetMapping("/contestId/{contestId}")
     public ResponseEntity<?> getSubmissionsByContestId(@PathVariable String contestId) {
         return ResponseEntity.ok(
-                submissionService.getSubmissionByContestId(contestId)
-        );
+                submissionService.getSubmissionByContestId(contestId));
     }
 
     @GetMapping("/problemId/{problemId}")
     public ResponseEntity<?> getSubmissionsByProblemId(@PathVariable String problemId) {
         return ResponseEntity.ok(
-                submissionService.getSubmissionByProblemId(problemId)
-        );
+                submissionService.getSubmissionByProblemId(problemId));
     }
 }

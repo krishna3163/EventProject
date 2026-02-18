@@ -20,8 +20,7 @@ public class ContestService {
         if (request.getStartTime().isAfter(request.getEndTime())) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Start time must be before end time"
-            );
+                    "Start time must be before end time");
         }
 
         Contest contest = Contest.builder()
@@ -29,6 +28,7 @@ public class ContestService {
                 .startTime(request.getStartTime())
                 .endTime(request.getEndTime())
                 .problemIds(request.getProblemIds())
+                .organizationId(request.getOrganizationId())
                 .build();
 
         return mapToResponse(contestRepository.save(contest));
@@ -41,12 +41,18 @@ public class ContestService {
                 .collect(Collectors.toList());
     }
 
+    public List<ContestResponse> getOrgContests(String orgId) {
+        return contestRepository.findByOrganizationId(orgId)
+                .stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
     public ContestResponse getContestById(String id) {
         Contest contest = contestRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "Contest not found"
-                ));
+                        "Contest not found"));
 
         return mapToResponse(contest);
     }
@@ -68,8 +74,7 @@ public class ContestService {
         if (!contestRepository.existsById(id)) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
-                    "Contest not found"
-            );
+                    "Contest not found");
         }
         contestRepository.deleteById(id);
     }
@@ -79,20 +84,19 @@ public class ContestService {
         Contest contest = contestRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "Contest not found"
-                ));
+                        "Contest not found"));
 
         if (request.getStartTime().isAfter(request.getEndTime())) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Start time must be before end time"
-            );
+                    "Start time must be before end time");
         }
 
         contest.setTitle(request.getTitle());
         contest.setStartTime(request.getStartTime());
         contest.setEndTime(request.getEndTime());
         contest.setProblemIds(request.getProblemIds());
+        contest.setOrganizationId(request.getOrganizationId());
 
         return mapToResponse(contestRepository.save(contest));
     }
@@ -104,6 +108,7 @@ public class ContestService {
                 .startTime(contest.getStartTime())
                 .endTime(contest.getEndTime())
                 .problemIds(contest.getProblemIds())
+                .organizationId(contest.getOrganizationId())
                 .build();
     }
 }

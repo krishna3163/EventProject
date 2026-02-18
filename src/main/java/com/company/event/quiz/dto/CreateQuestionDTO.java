@@ -11,7 +11,9 @@ public class CreateQuestionDTO {
 
     private List<String> options;
 
-    private Integer correctOption;
+    private Integer correctOption; // legacy support
+    private List<Integer> correctOptions;
+    private Boolean isMultipleChoice = false;
 
     private Double marks;
 

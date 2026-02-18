@@ -83,18 +83,18 @@ const EventForm = ({ initialData, onSubmit, isLoading, category: initialCategory
         <form onSubmit={handleSubmit} className="space-y-8 animate-fade-in">
             {/* Category Toggle */}
             {!initialData && (
-                <div className="bg-gray-100 p-1.5 rounded-2xl flex space-x-1">
+                <div className="bg-bg-tertiary p-1.5 rounded-2xl flex space-x-1 border border-card-border">
                     <button
                         type="button"
                         onClick={() => { setCategory('mcq'); setFormData(p => ({ ...p, type: 'MCQ' })); }}
-                        className={`flex-1 py-3 px-6 rounded-xl font-bold transition-all ${category === 'mcq' ? 'bg-white text-blue-600 shadow-md' : 'text-gray-500 hover:text-gray-700'}`}
+                        className={`flex-1 py-3 px-6 rounded-xl font-bold transition-all ${category === 'mcq' ? 'bg-bg-secondary text-accent-primary shadow-md' : 'text-text-secondary hover:text-text-primary'}`}
                     >
                         MCQ Quiz
                     </button>
                     <button
                         type="button"
                         onClick={() => { setCategory('coding'); setFormData(p => ({ ...p, type: 'CODING' })); }}
-                        className={`flex-1 py-3 px-6 rounded-xl font-bold transition-all ${category === 'coding' ? 'bg-white text-purple-600 shadow-md' : 'text-gray-500 hover:text-gray-700'}`}
+                        className={`flex-1 py-3 px-6 rounded-xl font-bold transition-all ${category === 'coding' ? 'bg-bg-secondary text-accent-secondary shadow-md' : 'text-text-secondary hover:text-text-primary'}`}
                     >
                         Coding Contest
                     </button>
@@ -102,11 +102,11 @@ const EventForm = ({ initialData, onSubmit, isLoading, category: initialCategory
             )}
 
             {/* Basic Info */}
-            <div className="card p-8 space-y-6 glass-effect">
-                <h3 className="text-xl font-black text-gray-800 border-l-4 border-blue-500 pl-4">Basic Information</h3>
+            <div className="card space-y-6">
+                <h3 className="text-xl font-black text-text-primary border-l-4 border-accent-primary pl-4">Basic Information</h3>
 
                 <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-700 ml-1">Event Title</label>
+                    <label className="text-sm font-bold text-text-secondary ml-1">Event Title</label>
                     <input
                         type="text"
                         name="title"
@@ -120,7 +120,7 @@ const EventForm = ({ initialData, onSubmit, isLoading, category: initialCategory
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-700 ml-1">Start Date & Time</label>
+                        <label className="text-sm font-bold text-text-secondary ml-1">Start Date & Time</label>
                         <input
                             type="datetime-local"
                             name="startTime"
@@ -131,7 +131,7 @@ const EventForm = ({ initialData, onSubmit, isLoading, category: initialCategory
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-700 ml-1">End Date & Time</label>
+                        <label className="text-sm font-bold text-text-secondary ml-1">End Date & Time</label>
                         <input
                             type="datetime-local"
                             name="endTime"
@@ -146,7 +146,7 @@ const EventForm = ({ initialData, onSubmit, isLoading, category: initialCategory
                 {category === 'mcq' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <label className="text-sm font-bold text-gray-700 ml-1">Duration (Minutes)</label>
+                            <label className="text-sm font-bold text-text-secondary ml-1">Duration (Minutes)</label>
                             <input
                                 type="number"
                                 name="durationInMinutes"
@@ -157,7 +157,7 @@ const EventForm = ({ initialData, onSubmit, isLoading, category: initialCategory
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-bold text-gray-700 ml-1">Total Marks</label>
+                            <label className="text-sm font-bold text-text-secondary ml-1">Total Marks</label>
                             <input
                                 type="number"
                                 name="totalMarks"
@@ -173,27 +173,27 @@ const EventForm = ({ initialData, onSubmit, isLoading, category: initialCategory
 
             {/* Problem Selection for Contests */}
             {category === 'coding' && (
-                <div className="card p-8 space-y-6 glass-effect min-h-[300px]">
-                    <h3 className="text-xl font-black text-gray-800 border-l-4 border-purple-500 pl-4">Manage Problems</h3>
-                    <p className="text-gray-500 text-sm font-medium -mt-4">Select the problems for this contest</p>
+                <div className="card space-y-6 min-h-[300px]">
+                    <h3 className="text-xl font-black text-text-primary border-l-4 border-accent-secondary pl-4">Manage Problems</h3>
+                    <p className="text-text-secondary text-sm font-medium -mt-4">Select the problems for this contest</p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {problems.length > 0 ? problems.map(prob => (
                             <div
                                 key={prob.id}
                                 onClick={() => handleProblemToggle(prob.id)}
-                                className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between ${formData.problemIds.includes(prob.id)
-                                    ? 'border-purple-500 bg-purple-50 ring-4 ring-purple-100'
-                                    : 'border-gray-100 bg-gray-50 hover:border-purple-200'
+                                className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${formData.problemIds.includes(prob.id)
+                                    ? 'border-accent-secondary bg-accent-secondary/5 ring-2 ring-accent-secondary/20'
+                                    : 'border-card-border bg-bg-tertiary/30 hover:border-accent-secondary/50'
                                     }`}
                             >
                                 <div>
-                                    <p className="font-bold text-gray-800">{prob.title}</p>
-                                    <p className={`text-[10px] font-black uppercase tracking-widest ${prob.difficulty === 'EASY' ? 'text-emerald-500' :
-                                        prob.difficulty === 'MEDIUM' ? 'text-amber-500' : 'text-red-500'
+                                    <p className="font-bold text-text-primary">{prob.title}</p>
+                                    <p className={`text-[10px] font-black uppercase tracking-widest ${prob.difficulty === 'EASY' ? 'text-status-success' :
+                                        prob.difficulty === 'MEDIUM' ? 'text-status-warning' : 'text-status-error'
                                         }`}>{prob.difficulty}</p>
                                 </div>
-                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${formData.problemIds.includes(prob.id) ? 'bg-purple-600 border-purple-600' : 'border-gray-300'
+                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${formData.problemIds.includes(prob.id) ? 'bg-accent-secondary border-accent-secondary' : 'border-text-secondary'
                                     }`}>
                                     {formData.problemIds.includes(prob.id) && (
                                         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -203,7 +203,7 @@ const EventForm = ({ initialData, onSubmit, isLoading, category: initialCategory
                                 </div>
                             </div>
                         )) : (
-                            <div className="col-span-2 text-center py-12 text-gray-400 font-medium italic">
+                            <div className="col-span-2 text-center py-12 text-text-secondary font-medium italic">
                                 No problems available. Please create potential problems first!
                             </div>
                         )}
@@ -214,10 +214,12 @@ const EventForm = ({ initialData, onSubmit, isLoading, category: initialCategory
             <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full py-5 rounded-2xl text-xl font-black text-white shadow-2xl transition-all active:scale-[0.98] ${category === 'mcq'
-                    ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'
-                    : 'bg-purple-600 hover:bg-purple-700 shadow-purple-200'
-                    } ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                className={`w-full py-5 rounded-2xl text-xl font-black text-white shadow-lg transform transition-all active:scale-[0.98] btn-primary ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                style={{
+                    background: category === 'mcq'
+                        ? 'linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))'
+                        : 'linear-gradient(135deg, var(--accent-secondary), var(--accent-primary))'
+                }}
             >
                 {isLoading ? (
                     <span className="flex items-center justify-center">

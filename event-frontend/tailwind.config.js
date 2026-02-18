@@ -8,35 +8,42 @@ export default {
     theme: {
         extend: {
             colors: {
-                primary: {
-                    50: '#eff6ff',
-                    100: '#dbeafe',
-                    200: '#bfdbfe',
-                    300: '#93c5fd',
-                    400: '#60a5fa',
-                    500: '#3b82f6',
-                    600: '#2563eb',
-                    700: '#1d4ed8',
-                    800: '#1e40af',
-                    900: '#1e3a8a',
+                bg: {
+                    primary: 'var(--bg-primary)',
+                    secondary: 'var(--bg-secondary)',
+                    tertiary: 'var(--bg-tertiary)',
                 },
-                secondary: {
-                    50: '#fdf4ff',
-                    100: '#fae8ff',
-                    200: '#f5d0fe',
-                    300: '#f0abfc',
-                    400: '#e879f9',
-                    500: '#d946ef',
-                    600: '#c026d3',
-                    700: '#a21caf',
-                    800: '#86198f',
-                    900: '#701a75',
+                text: {
+                    primary: 'var(--text-primary)',
+                    secondary: 'var(--text-secondary)',
+                },
+                accent: {
+                    primary: 'var(--accent-primary)',
+                    secondary: 'var(--accent-secondary)',
+                },
+                card: {
+                    bg: 'var(--card-bg)',
+                    border: 'var(--card-border)',
+                },
+                input: {
+                    bg: 'var(--input-bg)',
+                },
+                nav: {
+                    bg: 'var(--nav-bg)',
+                },
+                status: {
+                    success: 'var(--success)',
+                    warning: 'var(--warning)',
+                    error: 'var(--error)',
                 }
             },
             backgroundImage: {
                 'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
                 'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
             },
+            borderRadius: {
+                theme: 'var(--radius)',
+            }
         },
     },
     plugins: [],

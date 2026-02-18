@@ -12,6 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 
@@ -28,12 +29,23 @@ public class User implements UserDetails {
     private String password;
     @Indexed(unique = true)
     private String email;
-    private Roles role = Roles.USER;
+    @Builder.Default
+    private Roles role = Roles.STUDENT;
     private String firstName;
     private String lastName;
     private String fatherName;
     private String course;
     private String branch;
+
+    // New fields for role-based system
+    private String organizationId; // nullable, for ORG_ADMIN users
+    private String phone;
+    private String college;
+    private String firebaseUid;
+    private String photoUrl;
+    @Builder.Default
+    private boolean enabled = true;
+    private Instant createdAt;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -42,21 +54,21 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return UserDetails.super.isAccountNonExpired();
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return UserDetails.super.isAccountNonLocked();
+        return enabled;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return UserDetails.super.isCredentialsNonExpired();
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return UserDetails.super.isEnabled();
+        return enabled;
     }
 }

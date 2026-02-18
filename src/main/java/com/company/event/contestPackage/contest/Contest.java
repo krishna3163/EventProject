@@ -16,6 +16,7 @@ public class Contest {
     @Id
     private String id;
     private String title;
+    private String organizationId;
     private Instant startTime;
     private Instant endTime;
     private List<String> problemIds;

@@ -1,15 +1,8 @@
 package com.company.event.security;
 
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
-
-@Component
+// PasswordEncoder bean is now defined in SecurityConfig.
+// This file is kept for backward compatibility but is effectively empty.
+// @deprecated - use SecurityConfig.passwordEncoder() instead
 public class Config {
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    // intentionally empty
 }

@@ -40,6 +40,8 @@ event-frontend/dist/
 .env
 *.env.local
 event-frontend/.env
+*-service-account.json
+**/resources/*.json
 
 ### OS Files ###
 .DS_Store

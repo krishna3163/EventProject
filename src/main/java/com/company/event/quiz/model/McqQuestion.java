@@ -23,6 +23,14 @@ public class McqQuestion {
 
     private Integer correctOption;
 
+    private List<Integer> correctOptions;
+
+    private Boolean isMultipleChoice = false;
+
+    private String organizationId;
+
+    private String imageUrl;
+
     private Double marks;
 
     private Double negativeMarks;

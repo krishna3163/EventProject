@@ -1,119 +1,206 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
 
 const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [form, setForm] = useState({ email: '', password: '' });
+    const [phone, setPhone] = useState('');
+    const [otp, setOtp] = useState('');
+    const [showOtpInput, setShowOtpInput] = useState(false);
+
     const [isLoading, setIsLoading] = useState(false);
-    const { login } = useAuth();
+    const [showPassword, setShowPassword] = useState(false);
+
+    const { login, loginWithGoogle, loginWithPhone, verifyPhoneOtp, loginAnonymouslyUser } = useAuth();
     const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const handleEmailLogin = async (e) => {
         e.preventDefault();
+        const { email, password } = form;
+        if (!email || !password) return toast.error('Please fill in all fields');
+
         setIsLoading(true);
         try {
             await login(email, password);
             navigate('/');
         } catch (error) {
-            console.error(error);
+            console.error("Login error:", error);
+            toast.error(error.code || "Login failed");
         } finally {
             setIsLoading(false);
         }
     };
 
-    return (
-        <div className="min-h-[calc(100vh-80px)] flex items-center justify-center p-6 relative overflow-hidden">
-            {/* Dynamic Background Elements */}
-            <div className="absolute top-0 left-0 w-96 h-96 bg-blue-400 opacity-10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
-            <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-400 opacity-10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 animate-pulse" style={{ animationDelay: '2s' }}></div>
+    const handleGoogleLogin = async () => {
+        setIsLoading(true);
+        try {
+            await loginWithGoogle();
+            navigate('/');
+        } catch (error) {
+            toast.error(error.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-            <div className="card max-w-md w-full p-8 relative z-10 glass-effect">
-                <div className="text-center mb-10">
-                    <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-4 rounded-2xl w-20 h-20 mx-auto mb-6 shadow-xl transform hover:rotate-12 transition-transform duration-300">
-                        <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-1.173-10.99c.001-1.109.158-2.128.441-3.049m0 0a17.303 17.303 0 0113.111 0c.283.921.44 1.94.441 3.049m0 0a17.47 17.47 0 01-1.173 5.411m-1.173 5.579a17.452 17.452 0 01-10.762 0" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11l-3 3-3-3" />
-                        </svg>
-                    </div>
-                    <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+    const handlePhoneLogin = async (e) => {
+        e.preventDefault();
+        if (!phone) return toast.error("Enter phone number (e.g., +1234567890)");
+
+        setIsLoading(true);
+        try {
+            await loginWithPhone(phone);
+            setShowOtpInput(true);
+            toast.success("OTP sent!");
+        } catch (error) {
+            toast.error(error.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleVerifyOtp = async (e) => {
+        e.preventDefault();
+        if (!otp) return toast.error("Enter OTP");
+
+        setIsLoading(true);
+        try {
+            await verifyPhoneOtp(otp);
+            navigate('/');
+        } catch (error) {
+            toast.error("Invalid OTP");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleAnonLogin = async () => {
+        setIsLoading(true);
+        try {
+            await loginAnonymouslyUser();
+            navigate('/');
+        } catch (error) {
+            toast.error(error.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleQuickLogin = (type) => {
+        if (type === 'admin') setForm({ email: 'admin@eventhub.com', password: 'admin123' });
+        else if (type === 'student') setForm({ email: 'student@demo.com', password: 'student123' });
+    };
+
+    return (
+        <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-bg-primary transition-colors duration-300">
+            {/* Background Decorations */}
+            <div className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-accent-primary opacity-10 rounded-full blur-[100px] animate-pulse"></div>
+            <div className="absolute bottom-1/4 right-0 w-[500px] h-[500px] bg-accent-secondary opacity-10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+
+            <div className="card max-w-md w-full p-8 relative z-10 glass-effect bg-bg-secondary shadow-2xl rounded-2xl border border-card-border">
+                <div className="text-center mb-6">
+                    <h1 className="text-3xl font-extrabold bg-gradient-to-r from-accent-primary to-accent-secondary bg-clip-text text-transparent">
                         Welcome Back
                     </h1>
-                    <p className="theme-text-secondary font-medium">Please enter your details to sign in</p>
+                    <p className="text-text-secondary mt-2 font-medium">Log in to your account</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold theme-text-primary ml-1">Email or Username</label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                            </div>
-                            <input
-                                type="text"
-                                required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="input-field pl-12"
-                                placeholder="Enter email or 'admin'"
-                            />
-                        </div>
-                    </div>
+                {/* Quick Demos */}
+                <div className="flex gap-2 mb-6">
+                    <button onClick={() => handleQuickLogin('admin')} className="flex-1 py-2 text-xs font-bold border border-accent-secondary text-accent-secondary bg-accent-secondary/5 rounded-lg hover:bg-accent-secondary/10 transition-all">
+                        🔐 Admin
+                    </button>
+                    <button onClick={() => handleQuickLogin('student')} className="flex-1 py-2 text-xs font-bold border border-accent-primary text-accent-primary bg-accent-primary/5 rounded-lg hover:bg-accent-primary/10 transition-all">
+                        🎓 Student
+                    </button>
+                </div>
 
-                    <div className="space-y-2">
-                        <div className="flex justify-between items-center ml-1">
-                            <label className="text-sm font-bold theme-text-primary">Password</label>
-                            <Link to="/forgot-password" size="sm" className="text-xs font-bold text-blue-600 hover:underline">
-                                Forgot Password?
-                            </Link>
-                        </div>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
-                            </div>
-                            <input
-                                type="password"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="input-field pl-12"
-                                placeholder="••••••••"
-                            />
-                        </div>
+                {/* Email Form */}
+                <form onSubmit={handleEmailLogin} className="space-y-4">
+                    <div>
+                        <input
+                            type="email"
+                            name="email"
+                            value={form.email}
+                            onChange={handleChange}
+                            className="input-field"
+                            placeholder="Email address"
+                            required
+                        />
                     </div>
-
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className={`w-full btn-primary py-4 text-lg mt-4 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                    >
-                        {isLoading ? (
-                            <span className="flex items-center justify-center">
-                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Authenticating...
-                            </span>
-                        ) : 'Sign In'}
+                    <div className="relative">
+                        <input
+                            type={showPassword ? 'text' : 'password'}
+                            name="password"
+                            value={form.password}
+                            onChange={handleChange}
+                            className="input-field"
+                            placeholder="Password"
+                            required
+                        />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary">
+                            {showPassword ? '🙈' : '👁️'}
+                        </button>
+                    </div>
+                    <button type="submit" disabled={isLoading} className="w-full py-3 btn-primary disabled:opacity-70 disabled:cursor-not-allowed">
+                        {isLoading ? 'Processing...' : 'Log In'}
                     </button>
                 </form>
 
-                <div className="mt-8 text-center border-t border-gray-100 pt-8">
-                    <p className="theme-text-secondary font-medium mb-4">New to EventHub?</p>
-                    <Link
-                        to="/signup"
-                        className="inline-flex items-center justify-center w-full py-4 border-2 border-blue-600 text-blue-600 font-bold rounded-2xl hover:bg-blue-50 transition-all active:scale-95 group"
-                    >
-                        <span>Create Account</span>
-                        <svg className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </Link>
+                <div className="relative my-6">
+                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-card-border"></div></div>
+                    <div className="relative flex justify-center text-sm"><span className="px-2 bg-bg-secondary text-text-secondary">Or continue with</span></div>
+                </div>
+
+                {/* Social / Phone / Anon */}
+                <div className="space-y-3">
+                    <button onClick={handleGoogleLogin} disabled={isLoading} className="w-full py-2.5 bg-bg-secondary border border-card-border text-text-primary font-bold rounded-xl hover:bg-bg-tertiary transition-all flex items-center justify-center gap-2">
+                        <span className="text-xl">🇬</span> Google
+                    </button>
+
+                    {!showOtpInput ? (
+                        <form onSubmit={handlePhoneLogin} className="flex gap-2">
+                            <input
+                                type="tel"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
+                                placeholder="+1 234 567 8900"
+                                className="input-field text-sm"
+                            />
+                            <button type="submit" disabled={isLoading} className="px-4 py-2 bg-status-success text-white font-bold rounded-xl hover:bg-opacity-90 transition-all shadow-md">
+                                📱 Phone
+                            </button>
+                        </form>
+                    ) : (
+                        <form onSubmit={handleVerifyOtp} className="flex gap-2 animate-fade-in">
+                            <input
+                                type="text"
+                                value={otp}
+                                onChange={(e) => setOtp(e.target.value)}
+                                placeholder="Enter OTP"
+                                className="input-field text-sm"
+                            />
+                            <button type="submit" disabled={isLoading} className="px-4 py-2 bg-status-success text-white font-bold rounded-xl hover:bg-opacity-90 transition-all shadow-md">
+                                Verify
+                            </button>
+                        </form>
+                    )}
+
+                    <button onClick={handleAnonLogin} disabled={isLoading} className="w-full py-2 text-sm text-text-secondary hover:text-text-primary font-medium hover:underline">
+                        🕵️ Continue as Guest
+                    </button>
+                </div>
+
+                {/* Recaptcha container */}
+                <div id="recaptcha-container"></div>
+
+                <div className="mt-6 text-center">
+                    <Link to="/signup" className="text-accent-primary font-bold hover:underline text-sm">Create an Account</Link>
                 </div>
             </div>
         </div>

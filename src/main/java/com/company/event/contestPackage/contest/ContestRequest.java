@@ -18,4 +18,5 @@ public class ContestRequest {
     private Instant endTime;
     @NotNull
     private List<String> problemIds;
+    private String organizationId;
 }

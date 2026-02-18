@@ -27,8 +27,37 @@ public class SubmissionService {
     private final UserRepository userRepository;
     private final JDoodleService jDoodleService;
 
-    public SubmissionResponse submitCode(SubmissionRequest request) {
+    public Map<String, Object> runCode(SubmissionRequest request) {
+        Problem problem = problemRepository.findById(request.getProblemId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Problem not found"));
 
+        if (problem.getTestCases() == null || problem.getTestCases().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No test cases available for this problem");
+        }
+
+        // Use first test case (sample)
+        TestCase testCase = problem.getTestCases().get(0);
+
+        Map<String, Object> result = jDoodleService.executeCode(
+                normalize(request.getCode()),
+                getLanguageParam(request.getLanguage()),
+                getVersionIndex(request.getLanguage()),
+                normalize(testCase.getInput()));
+
+        String output = result.get("output") != null ? ((String) result.get("output")).trim() : "";
+        String expected = testCase.getExpectedOutput().trim();
+        String status = output.equals(expected) ? "PASSED" : "FAILED";
+
+        return Map.of(
+                "status", status,
+                "output", output,
+                "expectedOutput", expected,
+                "memory", result.getOrDefault("memory", "0"),
+                "cpuTime", result.getOrDefault("cpuTime", "0.0"));
+    }
+
+    public SubmissionResponse submitCode(SubmissionRequest request) {
         Contest contest = contestRepository.findById(request.getContestId())
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Contest not found"));
@@ -38,15 +67,13 @@ public class SubmissionService {
         if (now.isBefore(contest.getStartTime())) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Contest has not started yet"
-            );
+                    "Contest has not started yet");
         }
 
         if (now.isAfter(contest.getEndTime())) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Contest has ended"
-            );
+                    "Contest has ended");
         }
 
         Problem problem = problemRepository.findById(request.getProblemId())
@@ -79,8 +106,7 @@ public class SubmissionService {
                     normalize(submission.getCode()),
                     getLanguageParam(submission.getLanguage()),
                     getVersionIndex(submission.getLanguage()),
-                    normalize(testCase.getInput())
-            );
+                    normalize(testCase.getInput()));
 
             String output = result.get("output") != null
                     ? ((String) result.get("output")).trim()
@@ -120,7 +146,6 @@ public class SubmissionService {
                 .build();
     }
 
-
     private String getLanguageParam(String lang) {
         return switch (lang.toLowerCase()) {
             case "python" -> "python3";
@@ -142,7 +167,8 @@ public class SubmissionService {
     }
 
     private String normalize(String text) {
-        if (text == null) return "";
+        if (text == null)
+            return "";
         text = text.replace("\r\n", "\n");
         text = text.replace("\r", "\n");
         if (!text.endsWith("\n")) {
@@ -171,7 +197,8 @@ public class SubmissionService {
     }
 
     public SubmissionResponse getSubmissionById(String id) {
-        Submission submission1 = submissionRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Submission not found"));
+        Submission submission1 = submissionRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Submission not found"));
         SubmissionResponse submissionResponse = new SubmissionResponse();
         submissionResponse.setId(submission1.getId());
         submissionResponse.setCode(submission1.getCode());
@@ -186,7 +213,8 @@ public class SubmissionService {
     }
 
     public List<SubmissionResponse> getSubmissionByUserId(String userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         List<SubmissionResponse> submissions = new ArrayList<>();
         List<Submission> submissionList = submissionRepository.findAllByUserId(userId);
         for (Submission submission1 : submissionList) {
@@ -206,7 +234,8 @@ public class SubmissionService {
     }
 
     public List<SubmissionResponse> getSubmissionByContestId(String contestId) {
-        Contest contest = contestRepository.findById(contestId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contest not found"));
+        Contest contest = contestRepository.findById(contestId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contest not found"));
         List<SubmissionResponse> submissions = new ArrayList<>();
         List<Submission> submissionList = submissionRepository.findAllByContestId(contestId);
         for (Submission submission1 : submissionList) {
@@ -226,7 +255,8 @@ public class SubmissionService {
     }
 
     public List<SubmissionResponse> getSubmissionByProblemId(String problemId) {
-        Problem problem = problemRepository.findById(problemId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem not found"));
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem not found"));
         List<SubmissionResponse> submissions = new ArrayList<>();
         List<Submission> submissionList = submissionRepository.findAllByProblemId(problemId);
         for (Submission submission1 : submissionList) {

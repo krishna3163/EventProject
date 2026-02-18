@@ -17,4 +17,6 @@ public class ProblemResponse {
     private String description;
     private String difficulty;
     private List<TestCase> testCases;
+    private String organizationId;
+    private String imageUrl;
 }

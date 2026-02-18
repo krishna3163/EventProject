@@ -21,4 +21,6 @@ public class ProblemRequest {
     private String difficulty;
     @NotBlank
     private List<TestCase> testCases;
+    private String organizationId;
+    private String imageUrl;
 }

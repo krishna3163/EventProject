@@ -19,6 +19,8 @@ public class ProblemService {
         problem.setDifficulty(problemRequest.getDifficulty());
         problem.setTitle(problemRequest.getTitle());
         problem.setTestCases(problemRequest.getTestCases());
+        problem.setOrganizationId(problemRequest.getOrganizationId());
+        problem.setImageUrl(problemRequest.getImageUrl());
         try {
             problem = repository.save(problem);
         } catch (Exception e) {
@@ -30,6 +32,8 @@ public class ProblemService {
         response.setDifficulty(problem.getDifficulty());
         response.setTitle(problem.getTitle());
         response.setTestCases(problem.getTestCases());
+        response.setOrganizationId(problem.getOrganizationId());
+        response.setImageUrl(problem.getImageUrl());
         return response;
     }
 
@@ -48,46 +52,67 @@ public class ProblemService {
             response.setDifficulty(problem.getDifficulty());
             response.setTitle(problem.getTitle());
             response.setTestCases(problem.getTestCases());
+            response.setOrganizationId(problem.getOrganizationId());
+            response.setImageUrl(problem.getImageUrl());
+            responseList.add(response);
+        }
+        return responseList;
+    }
+
+    public List<ProblemResponse> getProblemsByOrganizationId(String organizationId) {
+        List<Problem> problems = new ArrayList<>();
+        try {
+            problems = repository.findByOrganizationId(organizationId);
+        } catch (Exception e) {
+            throw new RuntimeException("Problems could not be found for organization.");
+        }
+        List<ProblemResponse> responseList = new ArrayList<>();
+        for (Problem problem : problems) {
+            ProblemResponse response = new ProblemResponse();
+            response.setId(problem.getId());
+            response.setDescription(problem.getDescription());
+            response.setDifficulty(problem.getDifficulty());
+            response.setTitle(problem.getTitle());
+            response.setTestCases(problem.getTestCases());
+            response.setOrganizationId(problem.getOrganizationId());
+            response.setImageUrl(problem.getImageUrl());
             responseList.add(response);
         }
         return responseList;
     }
 
     public ProblemResponse getProblemById(String id) {
-        Problem problem = new Problem();
-        problem = repository.findById(id).orElseThrow(() -> new ResponseStatusException(
+        Problem problem = repository.findById(id).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "Problem not found"
-        ));
+                "Problem not found"));
         ProblemResponse response = new ProblemResponse();
         response.setId(problem.getId());
         response.setDescription(problem.getDescription());
         response.setDifficulty(problem.getDifficulty());
         response.setTitle(problem.getTitle());
         response.setTestCases(problem.getTestCases());
+        response.setOrganizationId(problem.getOrganizationId());
+        response.setImageUrl(problem.getImageUrl());
         return response;
     }
 
     public void deleteProblemById(String id) {
-        Problem problem ;
-        problem = repository.findById(id).orElseThrow(() -> new ResponseStatusException(
+        Problem problem = repository.findById(id).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "Problem not found"
-        ));
+                "Problem not found"));
         repository.delete(problem);
     }
 
-    public ProblemResponse updateProblem(ProblemRequest problemRequest,String id) {
-        Problem problem ;
-        problem = repository.findById(id).orElseThrow(() -> new ResponseStatusException(
+    public ProblemResponse updateProblem(ProblemRequest problemRequest, String id) {
+        Problem problem = repository.findById(id).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "Problem not found"
-        ));
+                "Problem not found"));
         problem.setDescription(problemRequest.getDescription());
         problem.setDifficulty(problemRequest.getDifficulty());
         problem.setTitle(problemRequest.getTitle());
         problem.setTestCases(problemRequest.getTestCases());
-        problem.setId(problem.getId());
+        problem.setOrganizationId(problemRequest.getOrganizationId());
+        problem.setImageUrl(problemRequest.getImageUrl());
         problem = repository.save(problem);
         ProblemResponse response = new ProblemResponse();
         response.setId(problem.getId());
@@ -95,6 +120,8 @@ public class ProblemService {
         response.setDifficulty(problem.getDifficulty());
         response.setTitle(problem.getTitle());
         response.setTestCases(problem.getTestCases());
+        response.setOrganizationId(problem.getOrganizationId());
+        response.setImageUrl(problem.getImageUrl());
         return response;
     }
 }

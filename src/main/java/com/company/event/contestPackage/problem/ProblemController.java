@@ -20,9 +20,9 @@ public class ProblemController {
         try {
             problemResponse = problemService.insertProblem(problemRequest);
         } catch (Exception e) {
-            return new ResponseEntity<>("Problem not created.",HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Problem not created.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(problemResponse,HttpStatus.CREATED);
+        return new ResponseEntity<>(problemResponse, HttpStatus.CREATED);
     }
 
     @GetMapping("/getAll")
@@ -31,9 +31,20 @@ public class ProblemController {
         try {
             responseList = problemService.getAllProblems();
         } catch (Exception e) {
-            return new ResponseEntity<>("Problem not found.",HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Problem not found.", HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(responseList,HttpStatus.OK);
+        return new ResponseEntity<>(responseList, HttpStatus.OK);
+    }
+
+    @GetMapping("/getOrgProblems/{orgId}")
+    public ResponseEntity<?> getOrgProblems(@PathVariable String orgId) {
+        List<ProblemResponse> responseList = new ArrayList<>();
+        try {
+            responseList = problemService.getProblemsByOrganizationId(orgId);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Problems not found for organization.", HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(responseList, HttpStatus.OK);
     }
 
     @GetMapping("/getById/{id}")
@@ -42,9 +53,9 @@ public class ProblemController {
         try {
             problemResponse = problemService.getProblemById(id);
         } catch (Exception e) {
-            return new ResponseEntity<>("Problem not found.",HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Problem not found.", HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(problemResponse,HttpStatus.OK);
+        return new ResponseEntity<>(problemResponse, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{id}")
@@ -52,19 +63,19 @@ public class ProblemController {
         try {
             problemService.deleteProblemById(id);
         } catch (Exception e) {
-            return new ResponseEntity<>("Problem not found.",HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Problem not found.", HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>("Deleted",HttpStatus.OK);
+        return new ResponseEntity<>("Deleted", HttpStatus.OK);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> update(@RequestBody ProblemRequest problemRequest,@PathVariable String id) {
+    public ResponseEntity<?> update(@RequestBody ProblemRequest problemRequest, @PathVariable String id) {
         ProblemResponse problemResponse;
         try {
-            problemResponse = problemService.updateProblem(problemRequest,id);
+            problemResponse = problemService.updateProblem(problemRequest, id);
         } catch (Exception e) {
-            return new ResponseEntity<>("Problem not found.",HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Problem not found.", HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(problemResponse,HttpStatus.OK);
+        return new ResponseEntity<>(problemResponse, HttpStatus.OK);
     }
 }
