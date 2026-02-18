@@ -112,6 +112,9 @@ export const apiService = {
         // Analytics
         getAnalytics: (eventId) => api.get(`/api/mcq/admin/analytics/${eventId}`),
         downloadPdf: (eventId) => api.get(`/api/mcq/admin/analytics/pdf/${eventId}`, { responseType: 'blob' }),
+
+        // History
+        getHistory: (studentId) => api.get('/api/mcq/history', { headers: { studentId } }),
     },
 
     // --- REGISTRATIONS ---

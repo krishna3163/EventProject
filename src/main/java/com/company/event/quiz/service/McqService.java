@@ -453,18 +453,28 @@ public class McqService {
 
         public List<com.company.event.quiz.dto.McqHistoryDTO> getStudentHistory(String studentId) {
                 List<McqSubmission> submissions = submissionRepository.findByStudentId(studentId);
-                return submissions.stream().map(s -> {
-                        Event event = eventRepository.findById(s.getEventId()).orElse(null);
-                        String eventTitle = event != null ? event.getTitle() : "Unknown Event";
-                        String orgId = event != null ? event.getOrganizationId() : null;
+                return submissions.stream()
+                                .filter(s -> s.getEventId() != null) // Avoid null IDs
+                                .map(s -> {
+                                        try {
+                                                Event event = eventRepository.findById(s.getEventId()).orElse(null);
+                                                String eventTitle = event != null ? event.getTitle() : "Unknown Event";
+                                                String orgId = event != null ? event.getOrganizationId() : null;
 
-                        return new com.company.event.quiz.dto.McqHistoryDTO(
-                                        s.getEventId(),
-                                        eventTitle,
-                                        orgId,
-                                        s.getTotalScore(),
-                                        s.getSubmittedAt());
-                }).toList();
+                                                return new com.company.event.quiz.dto.McqHistoryDTO(
+                                                                s.getEventId(),
+                                                                eventTitle,
+                                                                orgId,
+                                                                s.getTotalScore(),
+                                                                s.getSubmittedAt());
+                                        } catch (Exception e) {
+                                                System.err.println("Error mapping submission: " + s.getId() + " - "
+                                                                + e.getMessage());
+                                                return null;
+                                        }
+                                })
+                                .filter(Objects::nonNull)
+                                .toList();
         }
 
 }
