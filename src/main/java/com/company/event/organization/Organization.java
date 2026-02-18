@@ -32,4 +32,10 @@ public class Organization {
     private String createdBy; // user id of the creator
 
     private Instant createdAt;
+
+    private String description;
+
+    private String logoUrl;
+
+    private String website;
 }

@@ -50,3 +50,6 @@ desktop.ini
 
 ### Logs ###
 *.log
+
+### Local MongoDB Data ###
+mongodb-data/

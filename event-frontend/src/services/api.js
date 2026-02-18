@@ -71,6 +71,9 @@ export const apiService = {
     organization: {
         getAll: () => api.get('/api/admin/org/all'),
         getById: (id) => api.get(`/api/admin/org/${id}`),
+        getPublicProfile: (id) => api.get(`/api/public/org/${id}`),
+        getPublicEvents: (id) => api.get(`/api/public/org/${id}/events`),
+        search: (query) => api.get(`/api/public/org/search?query=${query}`),
         getStudents: (orgId) => api.get(`/api/admin/org/${orgId}/students`),
         getAdmins: (orgId) => api.get(`/api/admin/org/${orgId}/admins`),
         addAdmin: (orgId, data) => api.post(`/api/admin/org/${orgId}/add-admin`, data),
@@ -101,9 +104,10 @@ export const apiService = {
         deleteQuestion: (qId) => api.delete(`/api/questions/${qId}`),
 
         // Test Taking
-        startTest: (eventId, studentId) => api.post(`/api/mcq/start/${eventId}`, null, { headers: { studentId } }),
+        startTest: (eventId, studentId, data = {}) => api.post(`/api/mcq/start/${eventId}`, data, { headers: { studentId } }),
         submitTest: (eventId, studentId, data) => api.post(`/api/mcq/submit/${eventId}`, data, { headers: { studentId } }),
         getRemainingTime: (eventId, studentId) => api.get(`/api/mcq/remaining-time/${eventId}`, { headers: { studentId } }),
+        getResult: (eventId, studentId) => api.get(`/api/mcq/result/${eventId}`, { headers: { studentId } }),
 
         // Analytics
         getAnalytics: (eventId) => api.get(`/api/mcq/admin/analytics/${eventId}`),

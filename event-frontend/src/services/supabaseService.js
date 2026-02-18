@@ -155,6 +155,25 @@ export const supabaseService = {
             return { totalParticipations: 0, quizCount: 0, contestCount: 0, avgScore: 0, bestRank: null };
         }
     },
+    uploadImage: async (file) => {
+        try {
+            const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+            const { data, error } = await supabase.storage
+                .from('images')
+                .upload(fileName, file);
+
+            if (error) throw error;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('images')
+                .getPublicUrl(fileName);
+
+            return publicUrl;
+        } catch (e) {
+            console.warn('Supabase uploadImage:', e.message);
+            return null;
+        }
+    },
 };
 
 export default supabaseService;

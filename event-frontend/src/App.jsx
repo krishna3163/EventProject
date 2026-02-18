@@ -14,6 +14,7 @@ import Dashboard from './pages/Dashboard';
 import CreateEvent from './pages/CreateEvent';
 import { ThemeProvider } from './context/ThemeContext';
 import EditEvent from './pages/EditEvent';
+import FaviconAnimator from './components/FaviconAnimator';
 import EventDetails from './pages/EventDetails';
 import ManageQuestions from './pages/ManageQuestions';
 import AddQuestion from './pages/AddQuestion';
@@ -139,6 +140,11 @@ const AppRoutes = () => {
                             <ProblemStudio />
                         </ProtectedRoute>
                     } />
+                    <Route path="/organization/:id" element={
+                        <ProtectedRoute>
+                            <OrganizationProfile />
+                        </ProtectedRoute>
+                    } />
 
                     {/* Default Redirect */}
                     <Route path="*" element={<Navigate to="/" />} />
@@ -153,6 +159,7 @@ function App() {
     return (
         <AuthProvider>
             <ThemeProvider>
+                <FaviconAnimator />
                 <Router>
                     <AppRoutes />
                 </Router>

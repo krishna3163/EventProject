@@ -14,6 +14,15 @@ const EventForm = ({ initialData, onSubmit, isLoading, category: initialCategory
         totalMarks: 100,
         status: 'UPCOMING',
         problemIds: [],
+        title: '',
+        type: 'MCQ',
+        startTime: '',
+        endTime: '',
+        durationInMinutes: 60,
+        totalMarks: 100,
+        status: 'UPCOMING',
+        problemIds: [],
+        pin: '',
         ...initialData,
     });
 
@@ -141,6 +150,18 @@ const EventForm = ({ initialData, onSubmit, isLoading, category: initialCategory
                             onChange={handleChange}
                         />
                     </div>
+                </div>
+
+                <div className="space-y-2">
+                    <label className="text-sm font-bold text-text-secondary ml-1">Access PIN (Optional)</label>
+                    <input
+                        type="text"
+                        name="pin"
+                        className="input-field border-dashed focus:border-accent-primary"
+                        placeholder="e.g. 1234 (Leave empty for public access)"
+                        value={formData.pin || ''}
+                        onChange={handleChange}
+                    />
                 </div>
 
                 {category === 'mcq' && (

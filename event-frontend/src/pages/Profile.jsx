@@ -14,6 +14,51 @@ const Profile = () => {
     const [loading, setLoading] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [activeTab, setActiveTab] = useState('Registered');
+    const [history, setHistory] = useState([]);
+
+    React.useEffect(() => {
+        if (userId || user?.id) {
+            fetchHistory();
+        }
+    }, [userId, user]);
+
+    const fetchHistory = async () => {
+        try {
+            const targetId = userId && userId !== 'demo' ? userId : user?.id;
+            if (!targetId) return;
+
+            const [mcqRes, codeRes] = await Promise.all([
+                apiService.quiz.getHistory(targetId).catch(() => ({ data: [] })),
+                apiService.submission.getByUser(targetId).catch(() => ({ data: [] }))
+            ]);
+
+            const mcqItems = (mcqRes.data || []).map(item => ({
+                id: item.eventId,
+                type: 'mcq',
+                name: item.eventTitle,
+                status: 'Completed',
+                progress: 100,
+                color: 'text-emerald-500',
+                bg: 'bg-emerald-50',
+                date: item.submittedAt
+            }));
+
+            const codeItems = (codeRes.data || []).map(item => ({
+                id: item.problem?.id || item.id,
+                type: 'coding',
+                name: item.problem?.title || 'Coding Problem',
+                status: item.verdict === 'ACCEPTED' ? 'Completed' : 'Attempted',
+                progress: item.verdict === 'ACCEPTED' ? 100 : 50,
+                color: item.verdict === 'ACCEPTED' ? 'text-blue-500' : 'text-amber-500',
+                bg: 'bg-blue-50',
+                date: item.submittedAt
+            }));
+
+            setHistory([...mcqItems, ...codeItems]);
+        } catch (err) {
+            console.error("Failed to load history", err);
+        }
+    };
 
     // If viewing someone else's profile
     React.useEffect(() => {
@@ -264,25 +309,21 @@ const Profile = () => {
 
                         {/* Event List Simulation */}
                         <div className="space-y-4">
-                            {[
-                                { id: 'demo123', type: 'mcq', name: 'Theory of Computation', status: 'In-Progress', progress: 65, color: 'text-amber-500', bg: 'bg-amber-50' },
-                                { id: 'demo456', type: 'coding', name: 'Algorithm Deathmatch', status: 'Registered', progress: 0, color: 'text-blue-500', bg: 'bg-blue-50' },
-                                { id: 'demo789', type: 'mcq', name: 'DBMS Advanced Quiz', status: 'Completed', progress: 100, color: 'text-emerald-500', bg: 'bg-emerald-50' },
-                                { id: 'demo101', type: 'coding', name: 'Java Basics', status: 'Completed', progress: 100, color: 'text-emerald-500', bg: 'bg-emerald-50' },
-                                { id: 'demo202', type: 'mcq', name: 'Networking Essentials', status: 'In-Progress', progress: 30, color: 'text-amber-500', bg: 'bg-amber-50' }
-                            ]
-                                .filter(event => event.status === activeTab)
+                            {history.length === 0 ? (
+                                <p className="text-gray-400 text-center py-4">No participation history found.</p>
+                            ) : history
                                 .map((event, i) => (
                                     <div key={i} className="group p-6 rounded-[2rem] border border-gray-50 theme-bg-secondary hover:border-blue-100 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm hover:shadow-md">
                                         <div className="flex-1 space-y-1">
                                             <p className="text-lg font-bold theme-text-primary">{event.name}</p>
                                             <div className="flex items-center space-x-3">
                                                 <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${event.bg} ${event.color}`}>
-                                                    {event.status}
+                                                    {event.type} • {event.status}
                                                 </span>
-                                                <span className="text-xs text-gray-400 font-medium">Modified 2 hours ago</span>
+                                                <span className="text-xs text-gray-400 font-medium">{new Date(event.date).toLocaleDateString()}</span>
                                             </div>
                                         </div>
+
                                         <div className="w-full md:w-48 space-y-2">
                                             <div className="flex justify-between text-[10px] font-black uppercase theme-text-secondary">
                                                 <span>Progress</span>

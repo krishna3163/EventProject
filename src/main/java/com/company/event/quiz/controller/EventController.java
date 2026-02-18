@@ -2,6 +2,7 @@ package com.company.event.quiz.controller;
 
 import com.company.event.quiz.model.Event;
 import com.company.event.quiz.repository.EventRepository;
+import com.company.event.websocket.RealTimeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import java.util.List;
 public class EventController {
 
     private final EventRepository eventRepository;
+    private final RealTimeService realTimeService;
 
     // CREATE EVENT
     @PostMapping("/createEvent")
@@ -36,8 +38,9 @@ public class EventController {
         }
 
         event.setAttendanceProcessed(false);
-
-        return ResponseEntity.ok(eventRepository.save(event));
+        Event savedEvent = eventRepository.save(event);
+        realTimeService.broadcastDashboardUpdate("EVENT_CREATED");
+        return ResponseEntity.ok(savedEvent);
     }
 
     // UPDATE EVENT
@@ -53,7 +56,9 @@ public class EventController {
                     event.setOrganizationId(eventDetails.getOrganizationId());
                     event.setImageUrl(eventDetails.getImageUrl());
                     event.setStatus(eventDetails.getStatus());
-                    return ResponseEntity.ok(eventRepository.save(event));
+                    Event updatedEvent = eventRepository.save(event);
+                    realTimeService.broadcastDashboardUpdate("EVENT_UPDATED");
+                    return ResponseEntity.ok(updatedEvent);
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -65,6 +70,7 @@ public class EventController {
             return ResponseEntity.notFound().build();
         }
         eventRepository.deleteById(id);
+        realTimeService.broadcastDashboardUpdate("EVENT_DELETED");
         return ResponseEntity.ok("Event deleted successfully");
     }
 

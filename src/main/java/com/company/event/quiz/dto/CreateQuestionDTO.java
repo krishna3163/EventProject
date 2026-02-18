@@ -18,4 +18,8 @@ public class CreateQuestionDTO {
     private Double marks;
 
     private Double negativeMarks;
+
+    private String imageUrl;
+
+    private String correctTextAnswer;
 }

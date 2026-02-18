@@ -83,20 +83,48 @@ const ProblemStudio = () => {
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onload = (event) => {
+        reader.onload = async (event) => {
             try {
                 const importedData = JSON.parse(event.target.result);
-                // Validate basic structure if needed, for now just bulk set
-                setFormData({
-                    title: importedData.title || '',
-                    description: importedData.description || '',
-                    difficulty: importedData.difficulty || 'EASY',
-                    inputFormat: importedData.inputFormat || '',
-                    outputFormat: importedData.outputFormat || '',
-                    constraints: importedData.constraints || '',
-                    testCases: importedData.testCases || []
-                });
-                toast.success('Problem imported successfully!');
+
+                // Check if it's a bulk array or single item
+                if (Array.isArray(importedData)) {
+                    if (!window.confirm(`Found ${importedData.length} items. Import all?`)) return;
+
+                    let successCount = 0;
+                    let failCount = 0;
+
+                    for (const item of importedData) {
+                        try {
+                            if (item.type === 'MCQ' || item.questionText) {
+                                // Recommend ensure eventId is present
+                                if (!item.eventId) throw new Error("MCQ requires eventId");
+                                await apiService.quiz.addQuestion(item.eventId, item);
+                            } else {
+                                // Default to Coding Problem
+                                await apiService.problem.create(item);
+                            }
+                            successCount++;
+                        } catch (err) {
+                            console.error("Item failed:", item, err);
+                            failCount++;
+                        }
+                    }
+                    toast.info(`Imported: ${successCount}, Failed: ${failCount}`);
+                    fetchProblems(); // Refresh coding list
+                } else {
+                    // Single item fill form (Legacy behavior)
+                    setFormData({
+                        title: importedData.title || '',
+                        description: importedData.description || '',
+                        difficulty: importedData.difficulty || 'EASY',
+                        inputFormat: importedData.inputFormat || '',
+                        outputFormat: importedData.outputFormat || '',
+                        constraints: importedData.constraints || '',
+                        testCases: importedData.testCases || []
+                    });
+                    toast.success('Form filled from JSON');
+                }
             } catch (error) {
                 console.error('Import error:', error);
                 toast.error('Invalid JSON file');

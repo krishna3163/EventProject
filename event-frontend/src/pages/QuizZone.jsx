@@ -19,6 +19,9 @@ const QuizZone = () => {
     const [submitting, setSubmitting] = useState(false);
     const [tabSwitchWarnings, setTabSwitchWarnings] = useState(0);
 
+    const [showPinModal, setShowPinModal] = useState(false);
+    const [pinInput, setPinInput] = useState('');
+
     const [hasStarted, setHasStarted] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [securityActive, setSecurityActive] = useState(false);
@@ -108,24 +111,55 @@ const QuizZone = () => {
         );
     };
 
-    const handleStart = async () => {
+    const handleStart = async (pin = null) => {
         try {
             setLoading(true);
-            const res = await apiService.quiz.startTest(eventId, user.id);
-            const timeLimit = res.data || 3600; // Default 1 hour if not provided
-            setRemainingTime(timeLimit);
+            const data = pin ? { pin } : {};
+            const res = await apiService.quiz.startTest(eventId, user.id, data);
+
+            // Note: In Demo Mode or mismatched backend, res.data might be different.
+            // Assuming res.data contains questions list as per McqService.
+            // We need to set hasStarted.
+
             setHasStarted(true);
             startExamSecurity();
             toast.success("Assessment started! Good luck.");
+            setShowPinModal(false);
+
+            // Fetch remaining time if backend tracks it
+            try {
+                const timeRes = await apiService.quiz.getRemainingTime(eventId, user.id);
+                if (timeRes.data > 0) {
+                    setRemainingTime(timeRes.data);
+                } else {
+                    setRemainingTime(3600);
+                }
+            } catch (e) {
+                console.warn("Could not fetch remaining time, defaulting to 1 hour", e);
+                setRemainingTime(3600);
+            }
+
         } catch (err) {
             console.error("Start error:", err);
-            setStartError("Could not start assessment. Please try again or contact support.");
-            // For Demo:
-            if (questions.length > 0) {
-                setHasStarted(true);
-                setRemainingTime(3600);
-                startExamSecurity();
-                toast.info("Demo Mode: Assessment started without backend confirmation.");
+            const msg = err.response?.data?.error || err.response?.data || "";
+            // Check for PIN error (status 400 and message contains "PIN")
+            if (err.response?.status === 400 && (typeof msg === 'string' && (msg.toLowerCase().includes("pin")))) {
+                if (!showPinModal) {
+                    setShowPinModal(true);
+                    setLoading(false);
+                    return;
+                } else {
+                    toast.error("Invalid PIN. Please try again.");
+                }
+            } else {
+                setStartError("Could not start assessment. " + (typeof msg === 'string' ? msg : ""));
+                // Demo fallback (only if not PIN related)
+                if (questions.length > 0 && !pin && !showPinModal) {
+                    setHasStarted(true);
+                    setRemainingTime(3600);
+                    startExamSecurity();
+                    toast.info("Demo Mode: Assessment started without backend confirmation.");
+                }
             }
         } finally {
             setLoading(false);
@@ -178,6 +212,41 @@ const QuizZone = () => {
     if (!hasStarted) {
         return (
             <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+                {/* PIN Modal */}
+                {showPinModal && (
+                    <div className="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+                        <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl animate-scale-up">
+                            <h3 className="text-xl font-black text-gray-800 mb-4">Enter Event PIN</h3>
+                            <p className="text-gray-500 text-sm mb-6">This event is protected. Please enter the PIN provided by the organizer.</p>
+
+                            <input
+                                type="text"
+                                autoFocus
+                                className="w-full text-center text-2xl font-black tracking-[0.5em] p-4 border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:outline-none mb-6 uppercase"
+                                placeholder="PIN"
+                                value={pinInput}
+                                onChange={(e) => setPinInput(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleStart(pinInput)}
+                            />
+
+                            <div className="flex gap-4">
+                                <button
+                                    onClick={() => setShowPinModal(false)}
+                                    className="flex-1 py-3 text-gray-500 font-bold hover:bg-gray-100 rounded-xl"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={() => handleStart(pinInput)}
+                                    className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700"
+                                >
+                                    Submit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 text-center space-y-6">
                     <div className="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto text-4xl">
                         🛡️
@@ -200,7 +269,7 @@ const QuizZone = () => {
                     )}
 
                     <button
-                        onClick={handleStart}
+                        onClick={() => handleStart()}
                         className="w-full py-4 bg-blue-600 text-white font-black rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 hover:scale-[1.02] transition-all"
                     >
                         Start Assessment 🚀

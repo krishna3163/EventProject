@@ -33,4 +33,12 @@ public class Event {
     private String imageUrl;
 
     private String status; // UPCOMING, LIVE, COMPLETED
+
+    private String pin;
+
+    private String description;
+
+    private String prizes; // e.g. "1st: Laptop, 2nd: Tablet"
+
+    private String rules; // e.g. "No cheating, 1 hour limit"
 }

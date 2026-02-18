@@ -39,4 +39,12 @@ public class RealTimeService {
     public void broadcastDashboardUpdate(Object data) {
         messagingTemplate.convertAndSend("/topic/dashboard", data);
     }
+
+    public void notifyQuestionUpdate(String eventId, Object data) {
+        messagingTemplate.convertAndSend("/topic/events/" + eventId + "/questions", data);
+    }
+
+    public void notifyLeaderboardUpdate(String eventId, Object data) {
+        messagingTemplate.convertAndSend("/topic/events/" + eventId + "/leaderboard", data);
+    }
 }

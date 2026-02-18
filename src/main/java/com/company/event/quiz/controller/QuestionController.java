@@ -13,6 +13,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.company.event.websocket.RealTimeService;
+
 @RestController
 @RequestMapping("/api/questions")
 @RequiredArgsConstructor
@@ -20,57 +22,67 @@ public class QuestionController {
 
         private final McqQuestionRepository questionRepository;
         private final EventRepository eventRepository;
+        private final RealTimeService realTimeService;
 
         @GetMapping("/event/{eventId}")
         public ResponseEntity<?> getQuestionsByEvent(@PathVariable String eventId) {
                 return ResponseEntity.ok(questionRepository.findByEventId(eventId));
         }
 
+        @GetMapping("/organization/{orgId}")
+        public ResponseEntity<?> getQuestionsByOrganization(@PathVariable String orgId) {
+                return ResponseEntity.ok(questionRepository.findByOrganizationId(orgId));
+        }
+
         @DeleteMapping("/{id}")
         public ResponseEntity<?> deleteQuestion(@PathVariable String id) {
+                McqQuestion question = questionRepository.findById(id)
+                                .orElseThrow(() -> new RuntimeException("Question not found"));
                 questionRepository.deleteById(id);
+                realTimeService.notifyQuestionUpdate(question.getEventId(), "Question Deleted");
                 return ResponseEntity.ok("Question deleted successfully");
         }
 
-        @PostMapping("/{eventId}")
+        @PostMapping("/event/{eventId}")
         public ResponseEntity<?> addQuestion(@PathVariable String eventId,
                         @RequestBody CreateQuestionDTO request) {
 
                 Event event = eventRepository.findById(eventId)
                                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
-                if (!Instant.now().isBefore(event.getStartTime())) {
-                        return ResponseEntity.badRequest()
-                                        .body("Cannot add questions after event has started");
-                }
-
                 // Validation
-                if (request.getQuestionText() == null ||
-                                request.getOptions() == null ||
-                                request.getOptions().size() < 2 ||
-                                request.getMarks() == null) {
-
+                if (request.getQuestionText() == null || request.getMarks() == null) {
                         return ResponseEntity.badRequest()
                                         .body("Invalid question format");
                 }
 
-                if (Boolean.TRUE.equals(request.getIsMultipleChoice())) {
-                        if (request.getCorrectOptions() == null || request.getCorrectOptions().isEmpty()) {
-                                return ResponseEntity.badRequest().body(
-                                                "Multiple choice questions must have at least one correct option");
-                        }
-                        for (Integer opt : request.getCorrectOptions()) {
-                                if (opt >= request.getOptions().size()) {
-                                        return ResponseEntity.badRequest().body("Invalid correct option index: " + opt);
-                                }
-                        }
-                } else {
-                        if (request.getCorrectOption() == null) {
+                boolean isTextAnswer = request.getCorrectTextAnswer() != null
+                                && !request.getCorrectTextAnswer().trim().isEmpty();
+
+                if (!isTextAnswer) {
+                        if (request.getOptions() == null || request.getOptions().size() < 2) {
                                 return ResponseEntity.badRequest()
-                                                .body("Single choice questions must have a correct option");
+                                                .body("Need at least 2 options for multiple choice");
                         }
-                        if (request.getCorrectOption() >= request.getOptions().size()) {
-                                return ResponseEntity.badRequest().body("Correct option index invalid");
+                        if (Boolean.TRUE.equals(request.getIsMultipleChoice())) {
+                                if (request.getCorrectOptions() == null || request.getCorrectOptions().isEmpty()) {
+                                        return ResponseEntity.badRequest().body(
+                                                        "Multiple choice questions must have at least one correct option");
+                                }
+                                for (Integer opt : request.getCorrectOptions()) {
+                                        if (opt >= request.getOptions().size()) {
+                                                return ResponseEntity.badRequest()
+                                                                .body("Invalid correct option index: " + opt);
+                                        }
+                                }
+                        } else {
+                                if (request.getCorrectOption() == null) {
+                                        return ResponseEntity.badRequest()
+                                                        .body("Single choice questions must have a correct option");
+                                }
+                                if (request.getCorrectOption() >= request.getOptions().size()) {
+                                        return ResponseEntity.badRequest().body("Correct option index invalid");
+                                }
                         }
                 }
 
@@ -78,22 +90,33 @@ public class QuestionController {
                 question.setEventId(eventId);
                 question.setOrganizationId(event.getOrganizationId());
                 question.setQuestionText(request.getQuestionText());
-                question.setOptions(request.getOptions());
-                question.setIsMultipleChoice(request.getIsMultipleChoice());
-
-                if (Boolean.TRUE.equals(request.getIsMultipleChoice())) {
-                        question.setCorrectOptions(request.getCorrectOptions());
-                        question.setCorrectOption(request.getCorrectOptions().get(0)); // for backward compatibility
-                } else {
-                        question.setCorrectOption(request.getCorrectOption());
-                        question.setCorrectOptions(List.of(request.getCorrectOption()));
-                }
-
+                question.setImageUrl(request.getImageUrl());
                 question.setMarks(request.getMarks());
                 question.setNegativeMarks(
                                 request.getNegativeMarks() == null ? 0.0 : request.getNegativeMarks());
 
-                return ResponseEntity.ok(questionRepository.save(question));
+                if (isTextAnswer) {
+                        question.setCorrectTextAnswer(request.getCorrectTextAnswer());
+                        question.setOptions(null);
+                        question.setIsMultipleChoice(false);
+                } else {
+                        question.setOptions(request.getOptions());
+                        question.setIsMultipleChoice(request.getIsMultipleChoice());
+
+                        if (Boolean.TRUE.equals(request.getIsMultipleChoice())) {
+                                question.setCorrectOptions(request.getCorrectOptions());
+                                if (!request.getCorrectOptions().isEmpty()) {
+                                        question.setCorrectOption(request.getCorrectOptions().get(0));
+                                }
+                        } else {
+                                question.setCorrectOption(request.getCorrectOption());
+                                question.setCorrectOptions(List.of(request.getCorrectOption()));
+                        }
+                }
+
+                McqQuestion savedQuestion = questionRepository.save(question);
+                realTimeService.notifyQuestionUpdate(eventId, "Question Added");
+                return ResponseEntity.ok(savedQuestion);
         }
 
         @PostMapping("/bulk/{eventId}")
@@ -103,10 +126,10 @@ public class QuestionController {
                 Event event = eventRepository.findById(eventId)
                                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
-                if (!Instant.now().isBefore(event.getStartTime())) {
-                        return ResponseEntity.badRequest()
-                                        .body("Cannot add questions after event has started");
-                }
+                // if (!Instant.now().isBefore(event.getStartTime())) {
+                // return ResponseEntity.badRequest()
+                // .body("Cannot add questions after event has started");
+                // }
 
                 List<McqQuestion> questionList = new ArrayList<>();
 
@@ -139,6 +162,7 @@ public class QuestionController {
                         q.setQuestionText(req.getQuestionText());
                         q.setOptions(req.getOptions());
                         q.setIsMultipleChoice(req.getIsMultipleChoice());
+                        q.setImageUrl(req.getImageUrl());
 
                         if (Boolean.TRUE.equals(req.getIsMultipleChoice())) {
                                 q.setCorrectOptions(req.getCorrectOptions());
@@ -157,7 +181,9 @@ public class QuestionController {
                         questionList.add(q);
                 }
 
-                return ResponseEntity.ok(questionRepository.saveAll(questionList));
+                List<McqQuestion> savedQuestions = questionRepository.saveAll(questionList);
+                realTimeService.notifyQuestionUpdate(eventId, "Questions Added");
+                return ResponseEntity.ok(savedQuestions);
         }
 
 }

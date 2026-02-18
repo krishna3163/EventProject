@@ -12,6 +12,8 @@ import com.company.event.quiz.repository.EventRegistrationRepository;
 import com.company.event.quiz.repository.EventRepository;
 import com.company.event.quiz.repository.McqQuestionRepository;
 import com.company.event.quiz.repository.McqSubmissionRepository;
+import com.company.event.user.User;
+import com.company.event.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.company.event.websocket.RealTimeService;
+
 @Service
 @RequiredArgsConstructor
 public class McqService {
@@ -29,17 +33,24 @@ public class McqService {
         private final McqQuestionRepository questionRepository;
         private final McqSubmissionRepository submissionRepository;
         private final EventRegistrationRepository registrationRepository;
+        private final RealTimeService realTimeService;
+        private final UserRepository userRepository;
 
-        // ==========================
-        // START OR RESUME TEST
-        // ==========================
-        public List<QuestionResponseDTO> startTest(String studentId, String eventId) {
+        // ... startTest method (no changes) ...
+
+        public List<QuestionResponseDTO> startTest(String studentId, String eventId, String pin) {
 
                 Event event = eventRepository.findById(eventId)
                                 .orElseThrow(() -> new EventNotFoundException("Event not found"));
 
                 if (event.getStartTime() == null || event.getEndTime() == null) {
                         throw new IllegalStateException("Event timing not configured properly");
+                }
+
+                if (event.getPin() != null && !event.getPin().trim().isEmpty()) {
+                        if (pin == null || !pin.trim().equals(event.getPin().trim())) {
+                                throw new IllegalStateException("Invalid Event PIN");
+                        }
                 }
 
                 Instant now = Instant.now();
@@ -158,28 +169,40 @@ public class McqService {
                                 throw new IllegalArgumentException("Invalid question detected in submission");
                         }
 
-                        List<Integer> selectedOptions = ans.getSelectedOptions();
-                        List<Integer> correctOptions = question.getCorrectOptions();
-
                         boolean isCorrect = false;
 
-                        if (Boolean.TRUE.equals(question.getIsMultipleChoice())) {
-                                // Multiple Choice: All selected options must match exactly with correct options
-                                if (selectedOptions != null && correctOptions != null &&
-                                                selectedOptions.size() == correctOptions.size() &&
-                                                new HashSet<>(selectedOptions).equals(new HashSet<>(correctOptions))) {
+                        // Check for text answer first
+                        if (question.getOptions() == null || question.getOptions().isEmpty()) {
+                                String userText = ans.getTextAnswer();
+                                String correctText = question.getCorrectTextAnswer();
+
+                                if (userText != null && correctText != null &&
+                                                userText.trim().equalsIgnoreCase(correctText.trim())) {
                                         isCorrect = true;
                                 }
                         } else {
-                                // Single Choice: First selected option must match first correct option
-                                Integer selected = (selectedOptions != null && !selectedOptions.isEmpty())
-                                                ? selectedOptions.get(0)
-                                                : null;
-                                Integer correctOpt = (correctOptions != null && !correctOptions.isEmpty())
-                                                ? correctOptions.get(0)
-                                                : null;
-                                if (selected != null && correctOpt != null && selected.equals(correctOpt)) {
-                                        isCorrect = true;
+                                List<Integer> selectedOptions = ans.getSelectedOptions();
+                                List<Integer> correctOptions = question.getCorrectOptions();
+
+                                if (Boolean.TRUE.equals(question.getIsMultipleChoice())) {
+                                        // Multiple Choice: All selected options must match exactly with correct options
+                                        if (selectedOptions != null && correctOptions != null &&
+                                                        selectedOptions.size() == correctOptions.size() &&
+                                                        new HashSet<>(selectedOptions)
+                                                                        .equals(new HashSet<>(correctOptions))) {
+                                                isCorrect = true;
+                                        }
+                                } else {
+                                        // Single Choice: First selected option must match first correct option
+                                        Integer selected = (selectedOptions != null && !selectedOptions.isEmpty())
+                                                        ? selectedOptions.get(0)
+                                                        : null;
+                                        Integer correctOpt = (correctOptions != null && !correctOptions.isEmpty())
+                                                        ? correctOptions.get(0)
+                                                        : null;
+                                        if (selected != null && correctOpt != null && selected.equals(correctOpt)) {
+                                                isCorrect = true;
+                                        }
                                 }
                         }
 
@@ -187,9 +210,12 @@ public class McqService {
                                 totalScore += Optional.ofNullable(question.getMarks()).orElse(0.0);
                                 correct++;
                         } else {
-                                // Only subtract if they actually selected something (optional policy, usually
-                                // any wrong answer marks negative)
-                                if (selectedOptions != null && !selectedOptions.isEmpty()) {
+                                // Only subtract if they actually selected something or typed something
+                                boolean hasAnswer = (ans.getSelectedOptions() != null
+                                                && !ans.getSelectedOptions().isEmpty()) ||
+                                                (ans.getTextAnswer() != null && !ans.getTextAnswer().trim().isEmpty());
+
+                                if (hasAnswer) {
                                         wrong++;
                                         Double negative = question.getNegativeMarks();
                                         if (negative != null) {
@@ -211,10 +237,21 @@ public class McqService {
 
                 submissionRepository.save(submission);
 
+                // Broadcast Leaderboard Update
+                realTimeService.notifyLeaderboardUpdate(eventId, getEventAnalytics(eventId).getTopPerformers());
+
+                // Check for delayed results
+                if (event.getEndTime() != null && now.isBefore(event.getEndTime().plusSeconds(10))) {
+                        // Hide results if contest is not ended or within 10s buffer
+                        return new McqResultDTO(-1, -1, -1, -1);
+                }
+
                 int rank = calculateRank(eventId, studentId);
 
                 return new McqResultDTO((int) totalScore, correct, wrong, rank);
         }
+
+        // ... calculateRank, getRemainingTime, getEventAnalytics (no changes) ...
 
         // ==========================
         // LEADERBOARD RANK
@@ -353,9 +390,26 @@ public class McqService {
                         if (s.getTotalScore() == null)
                                 continue;
 
+                        String name = "Anonymous";
+                        String branch = "N/A";
+
+                        try {
+                                Optional<User> userOpt = userRepository.findById(s.getStudentId());
+                                if (userOpt.isPresent()) {
+                                        User u = userOpt.get();
+                                        name = u.getFirstName() + " "
+                                                        + (u.getLastName() != null ? u.getLastName() : "");
+                                        branch = u.getBranch() != null ? u.getBranch() : "N/A";
+                                }
+                        } catch (Exception e) {
+                                // Ignore user fetch errors
+                        }
+
                         topPerformers.add(
                                         new TopPerformerDTO(
                                                         s.getStudentId(),
+                                                        name.trim(),
+                                                        branch,
                                                         s.getTotalScore(),
                                                         i + 1));
                 }
@@ -374,4 +428,43 @@ public class McqService {
         public AdminEventAnalyticsDTO getEventAnalyticsForPdf(String eventId) {
                 return getEventAnalytics(eventId);
         }
+
+        public McqResultDTO getStudentResult(String studentId, String eventId) {
+                McqSubmission submission = submissionRepository.findByStudentIdAndEventId(studentId, eventId)
+                                .orElseThrow(() -> new TestNotStartedException("Test not taken"));
+
+                Event event = eventRepository.findById(eventId)
+                                .orElseThrow(() -> new EventNotFoundException("Event not found"));
+
+                Instant now = Instant.now();
+                if (event.getEndTime() != null && now.isBefore(event.getEndTime().plusSeconds(10))) {
+                        return new McqResultDTO(-1, -1, -1, -1);
+                }
+
+                int rank = calculateRank(eventId, studentId);
+                int score = submission.getTotalScore() != null ? submission.getTotalScore().intValue() : 0;
+
+                return new McqResultDTO(
+                                score,
+                                submission.getCorrectCount(),
+                                submission.getWrongCount(),
+                                rank);
+        }
+
+        public List<com.company.event.quiz.dto.McqHistoryDTO> getStudentHistory(String studentId) {
+                List<McqSubmission> submissions = submissionRepository.findByStudentId(studentId);
+                return submissions.stream().map(s -> {
+                        Event event = eventRepository.findById(s.getEventId()).orElse(null);
+                        String eventTitle = event != null ? event.getTitle() : "Unknown Event";
+                        String orgId = event != null ? event.getOrganizationId() : null;
+
+                        return new com.company.event.quiz.dto.McqHistoryDTO(
+                                        s.getEventId(),
+                                        eventTitle,
+                                        orgId,
+                                        s.getTotalScore(),
+                                        s.getSubmittedAt());
+                }).toList();
+        }
+
 }

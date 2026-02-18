@@ -18,20 +18,19 @@ const QuizResult = () => {
 
     const fetchResult = async () => {
         try {
-            // The backend McqController doesn't have a direct 'getStudentResult' by eventId? 
-            // Let's check McqService. It calculates ranking. 
-            // Often results are fetched via analytics or a specific student endpoint if added. 
-            // For now, let's assume we can fetch basic stats or redirect to home if not ready.
-            // Actually, since this is a demo, let's mock the result if the endpoint is missing, 
-            // but ideally we find the right backend call.
-            setLoading(false);
+            const response = await apiService.quiz.getResult(eventId, user.id);
+            setResult(response.data);
         } catch (error) {
             console.error('Error fetching results:', error);
+            toast.error("Could not fetch results. Please try again later.");
+        } finally {
             setLoading(false);
         }
     };
 
     if (loading) return <Loader />;
+
+    const isPending = !result || result.score === -1;
 
     return (
         <div className="max-w-4xl mx-auto py-16 px-4 text-center animate-fade-in">
@@ -50,14 +49,16 @@ const QuizResult = () => {
                     <p className="text-[10px] font-black uppercase text-blue-400 tracking-widest mb-4">Status</p>
                     <span className="text-2xl font-black text-blue-700">SUBMITTED</span>
                 </div>
-                <div className="card p-8 bg-purple-50/50 border-purple-100 flex flex-col items-center scale-110 shadow-2xl relative z-10">
+
+                <div className="card p-8 bg-purple-50/50 border-purple-100 flex flex-col items-center scale-110 shadow-2xl relative z-10 transition-transform hover:scale-115">
                     <p className="text-[10px] font-black uppercase text-purple-400 tracking-widest mb-4">Final Score</p>
-                    <span className="text-4xl font-black text-purple-800">Pending</span>
-                    <p className="text-[10px] text-purple-400 mt-2 font-bold">Calculation in progress</p>
+                    <span className="text-4xl font-black text-purple-800">{isPending ? "Pending" : result.score}</span>
+                    <p className="text-[10px] text-purple-400 mt-2 font-bold">{isPending ? "Calculation in progress" : "Official Score"}</p>
                 </div>
+
                 <div className="card p-8 bg-emerald-50/50 border-emerald-100 flex flex-col items-center">
                     <p className="text-[10px] font-black uppercase text-emerald-400 tracking-widest mb-4">Rank</p>
-                    <span className="text-2xl font-black text-emerald-700">TBD</span>
+                    <span className="text-2xl font-black text-emerald-700">{isPending ? "TBD" : `#${result.rank}`}</span>
                 </div>
             </div>
 

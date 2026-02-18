@@ -5,9 +5,20 @@ import { apiService } from '../services/api';
 import { supabaseService } from '../services/supabaseService';
 import { toast } from 'react-toastify';
 import Loader from '../components/Loader';
+import { useRealTime } from '../hooks/useRealTime';
 
 const OrgAdminDashboard = () => {
     const { user } = useAuth();
+
+    // Real-time updates for dashboard
+    useRealTime([`/topic/dashboard`], (topic, message) => {
+        console.log('Real-time update:', message);
+        if (['CONTEST_CREATED', 'CONTEST_UPDATED', 'CONTEST_DELETED',
+            'EVENT_CREATED', 'EVENT_UPDATED', 'EVENT_DELETED'].includes(message)) {
+            fetchData();
+            toast.info('Dashboard updated: ' + message.replace('_', ' ').toLowerCase());
+        }
+    });
 
     // MongoDB data
     const [events, setEvents] = useState([]);

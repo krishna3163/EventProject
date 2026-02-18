@@ -34,4 +34,6 @@ public class McqQuestion {
     private Double marks;
 
     private Double negativeMarks;
+
+    private String correctTextAnswer;
 }

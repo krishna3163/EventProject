@@ -8,6 +8,8 @@ import lombok.Data;
 public class TopPerformerDTO {
 
     private String studentId;
+    private String name;
+    private String branch;
     private Double score;
     private int rank;
 }

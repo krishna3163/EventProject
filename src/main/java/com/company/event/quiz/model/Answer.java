@@ -14,4 +14,6 @@ public class Answer {
     private String questionId;
 
     private List<Integer> selectedOptions;
+
+    private String textAnswer;
 }

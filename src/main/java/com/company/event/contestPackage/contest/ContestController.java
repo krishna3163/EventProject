@@ -1,5 +1,6 @@
 package com.company.event.contestPackage.contest;
 
+import com.company.event.websocket.RealTimeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,10 +14,13 @@ import java.util.Map;
 public class ContestController {
 
     private final ContestService contestService;
+    private final RealTimeService realTimeService;
 
     @PostMapping("/insert")
     public ResponseEntity<ContestResponse> createContest(@RequestBody ContestRequest request) {
-        return ResponseEntity.ok(contestService.createContest(request));
+        ContestResponse response = contestService.createContest(request);
+        realTimeService.broadcastDashboardUpdate("CONTEST_CREATED");
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/getAll")
@@ -45,6 +49,7 @@ public class ContestController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteContest(@PathVariable String id) {
         contestService.deleteContest(id);
+        realTimeService.broadcastDashboardUpdate("CONTEST_DELETED");
         return ResponseEntity.ok("Contest deleted successfully.");
     }
 
@@ -52,6 +57,8 @@ public class ContestController {
     public ResponseEntity<ContestResponse> updateContest(
             @PathVariable String id,
             @RequestBody ContestRequest request) {
-        return ResponseEntity.ok(contestService.updateContest(request, id));
+        ContestResponse response = contestService.updateContest(request, id);
+        realTimeService.broadcastDashboardUpdate("CONTEST_UPDATED");
+        return ResponseEntity.ok(response);
     }
 }
