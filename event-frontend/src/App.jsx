@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 
 // Pages
+import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import CreateEvent from './pages/CreateEvent';
 import { ThemeProvider } from './context/ThemeContext';
@@ -29,6 +30,7 @@ import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
 import Profile from './pages/Profile';
 import Certificates from './pages/Certificates';
+import OrganizationProfile from './pages/OrganizationProfile';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, adminOnly = false }) => {
@@ -51,23 +53,29 @@ const AppRoutes = () => {
     const location = useLocation();
 
     const isExamView = location.pathname.includes('/quiz/') || location.pathname.includes('/contest/');
+    const isLandingPage = !user && (location.pathname === '/' || location.pathname === '/home');
 
     return (
         <div className="min-h-screen flex flex-col font-sans transition-colors duration-300">
-            {!isExamView && <Navbar />}
+            {/* Show Navbar except on exam views and landing page */}
+            {!isExamView && !isLandingPage && <Navbar />}
             <main className={`flex-grow ${user && !isExamView ? 'container mx-auto px-4 py-8' : ''}`}>
                 <Routes>
-                    {/* Public Routes */}
+                    {/* Public Landing Page */}
+                    <Route path="/" element={
+                        user ? (
+                            <Dashboard />
+                        ) : (
+                            <LandingPage />
+                        )
+                    } />
+
+                    {/* Auth Routes */}
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
 
                     {/* User Protected Routes */}
-                    <Route path="/" element={
-                        <ProtectedRoute>
-                            <Dashboard />
-                        </ProtectedRoute>
-                    } />
                     <Route path="/event/:id" element={
                         <ProtectedRoute>
                             <EventDetails />

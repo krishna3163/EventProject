@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ThemeSwitcher from './ThemeSwitcher';
@@ -8,8 +8,15 @@ const Navbar = () => {
     const navigate = useNavigate();
     const { user, logout, isAdmin } = useAuth();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
 
     const isActive = (path) => location.pathname === path;
+
+    useEffect(() => {
+        const handleScroll = () => setScrolled(window.scrollY > 20);
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     const handleLogout = () => {
         logout();
@@ -17,18 +24,21 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="sticky top-0 z-50 nav-blur shadow-sm border-b border-card-border transition-all duration-300">
+        <nav className={`sticky top-0 z-50 transition-all duration-500 ${scrolled
+                ? 'nav-blur shadow-lg border-b border-card-border'
+                : 'nav-blur shadow-sm border-b border-card-border'
+            }`}>
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between h-20">
                     {/* Logo */}
                     <Link to="/" className="flex items-center space-x-3 group">
-                        <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-2.5 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <div className="bg-gradient-to-br from-indigo-500 to-blue-500 p-2.5 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300 group-hover:shadow-indigo-500/30">
                             <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
                         </div>
-                        <span className="text-2xl font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                            EventHub
+                        <span className="text-2xl font-black bg-gradient-to-r from-indigo-500 to-blue-500 bg-clip-text text-transparent">
+                            EventProject
                         </span>
                     </Link>
 
@@ -70,7 +80,7 @@ const Navbar = () => {
                                 {/* User Profile & Logout */}
                                 <div className="flex items-center gap-4 pl-2">
                                     <Link to="/profile" className="flex items-center gap-3 group cursor-pointer hover:bg-bg-tertiary p-2 rounded-xl transition-all">
-                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 shadow-md flex items-center justify-center text-white font-bold group-hover:scale-110 transition-transform">
+                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-blue-500 shadow-md flex items-center justify-center text-white font-bold group-hover:scale-110 transition-transform">
                                             {user.firstName ? user.firstName[0] : 'U'}
                                         </div>
                                         <div className="flex flex-col">
@@ -104,7 +114,6 @@ const Navbar = () => {
 
                     {/* Mobile menu button */}
                     <div className="md:hidden flex items-center gap-4">
-                        {/* Show ThemeSwitcher on Mobile Header too or in menu? Usually better in menu but convenient here. */}
                         {!user && <ThemeSwitcher />}
                         <button
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -125,7 +134,7 @@ const Navbar = () => {
             {/* Mobile Navigation */}
             {isMenuOpen && (
                 <div className="md:hidden bg-bg-secondary border-t border-card-border px-4 py-6 space-y-4 shadow-xl animate-fade-in-down">
-                    {/* Mobile Theme Switcher if needed explicitly or handle via component usage */}
+                    {/* Mobile Theme Switcher */}
                     <div className="flex justify-between items-center px-4">
                         <span className="font-bold text-text-secondary uppercase text-xs tracking-widest">Theme</span>
                         <ThemeSwitcher />
@@ -168,4 +177,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
