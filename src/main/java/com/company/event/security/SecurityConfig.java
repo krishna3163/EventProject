@@ -57,6 +57,9 @@ public class SecurityConfig {
                                                 .requestMatchers("/ws/**").permitAll()
                                                 // Swagger/OpenAPI
                                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                                                // Public Organization Endpoints
+                                                .requestMatchers("/api/public/**").permitAll()
+                                                .requestMatchers("/", "/error").permitAll()
                                                 // Student routes
                                                 .requestMatchers("/api/student/**")
                                                 .hasAnyRole("STUDENT", "USER", "ORG_ADMIN", "SUPER_ADMIN", "ADMIN")
