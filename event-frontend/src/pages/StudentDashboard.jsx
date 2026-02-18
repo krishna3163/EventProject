@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
 import { supabaseService } from '../services/supabaseService';
@@ -22,6 +22,16 @@ const StudentDashboard = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const { user } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Read tab from URL query params (e.g., /?tab=contests)
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const tab = params.get('tab');
+        if (tab && ['events', 'contests', 'history'].includes(tab)) {
+            setActiveTab(tab);
+        }
+    }, [location.search]);
 
     // Timer state to trigger re-renders every second
     const [now, setNow] = useState(new Date());
@@ -126,13 +136,16 @@ const StudentDashboard = () => {
             {/* ── STATS GRID ── */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 {[
-                    { label: 'Total Events', value: events.length, icon: '📋', g: 'from-blue-500 to-blue-600' },
-                    { label: 'Live Now', value: liveEvents.length, icon: '🔴', g: 'from-red-500 to-red-600' },
-                    { label: 'My Participations', value: myStats?.totalParticipations || 0, icon: '🏆', g: 'from-green-500 to-green-600' },
-                    { label: 'Avg Score', value: myStats?.avgScore || 0, icon: '📊', g: 'from-purple-500 to-purple-600' },
-                    { label: 'Best Rank', value: myStats?.bestRank ? `#${myStats.bestRank}` : '—', icon: '🎖️', g: 'from-orange-500 to-orange-600' },
+                    { label: 'Total Events', value: events.length, icon: '📋', g: 'from-blue-500 to-blue-600', action: () => setActiveTab('events') },
+                    { label: 'Live Now', value: liveEvents.length, icon: '🔴', g: 'from-red-500 to-red-600', action: () => { setActiveTab('events'); setSearchTerm(''); } },
+                    { label: 'My Participations', value: myStats?.totalParticipations || 0, icon: '🏆', g: 'from-green-500 to-green-600', action: () => setActiveTab('history') },
+                    { label: 'Avg Score', value: myStats?.avgScore || 0, icon: '📊', g: 'from-purple-500 to-purple-600', action: () => setActiveTab('history') },
+                    { label: 'Best Rank', value: myStats?.bestRank ? `#${myStats.bestRank}` : '—', icon: '🎖️', g: 'from-orange-500 to-orange-600', action: () => navigate('/profile') },
                 ].map((stat, i) => (
-                    <div key={i} className={`rounded-2xl bg-gradient-to-br ${stat.g} p-4 text-white shadow-lg`}>
+                    <div key={i}
+                        onClick={stat.action}
+                        className={`rounded-2xl bg-gradient-to-br ${stat.g} p-4 text-white shadow-lg cursor-pointer hover:scale-105 hover:shadow-xl transition-all duration-300 active:scale-95`}
+                    >
                         <div className="text-2xl mb-1">{stat.icon}</div>
                         <div className="text-2xl font-black">{stat.value}</div>
                         <div className="text-xs font-medium opacity-80">{stat.label}</div>

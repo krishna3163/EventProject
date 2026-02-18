@@ -23,10 +23,28 @@ const Navbar = () => {
         navigate('/login');
     };
 
+    // Student navigation links
+    const studentLinks = [
+        { to: '/', label: 'Dashboard', icon: '🏠' },
+        { to: '/?tab=events', label: 'Events', icon: '📋' },
+        { to: '/?tab=contests', label: 'Contests', icon: '⚔️' },
+        { to: '/?tab=history', label: 'My History', icon: '📈' },
+        { to: '/profile', label: 'Profile', icon: '👤' },
+    ];
+
+    // Admin navigation links  
+    const adminLinks = [
+        { to: '/', label: 'Dashboard', icon: '🏠' },
+        { to: '/create', label: 'Create Event', icon: '➕' },
+        { to: '/problems', label: 'Problem Studio', icon: '💻' },
+    ];
+
+    const navLinks = user ? (isAdmin ? adminLinks : studentLinks) : [];
+
     return (
         <nav className={`sticky top-0 z-50 transition-all duration-500 ${scrolled
-                ? 'nav-blur shadow-lg border-b border-card-border'
-                : 'nav-blur shadow-sm border-b border-card-border'
+            ? 'nav-blur shadow-lg border-b border-card-border'
+            : 'nav-blur shadow-sm border-b border-card-border'
             }`}>
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between h-20">
@@ -43,33 +61,23 @@ const Navbar = () => {
                     </Link>
 
                     {/* Desktop Navigation */}
-                    <div className="hidden md:flex items-center space-x-6">
+                    <div className="hidden md:flex items-center space-x-1">
                         {user ? (
                             <>
-                                <div className="flex items-center space-x-6 mr-4">
-                                    <Link
-                                        to="/"
-                                        className={`font-semibold transition-all duration-300 hover:text-accent-primary ${isActive('/') ? 'text-accent-primary scale-105' : 'text-text-secondary'}`}
-                                    >
-                                        Dashboard
-                                    </Link>
-
-                                    {isAdmin && (
-                                        <>
-                                            <Link
-                                                to="/create"
-                                                className={`font-semibold transition-all duration-300 hover:text-accent-primary ${isActive('/create') ? 'text-accent-primary scale-105' : 'text-text-secondary'}`}
-                                            >
-                                                Create
-                                            </Link>
-                                            <Link
-                                                to="/problems"
-                                                className={`font-semibold transition-all duration-300 hover:text-accent-secondary ${isActive('/problems') ? 'text-accent-secondary scale-105' : 'text-text-secondary'}`}
-                                            >
-                                                Problem Studio
-                                            </Link>
-                                        </>
-                                    )}
+                                <div className="flex items-center space-x-1 mr-4">
+                                    {navLinks.map(link => (
+                                        <Link
+                                            key={link.to}
+                                            to={link.to}
+                                            className={`px-3 py-2 rounded-xl font-semibold text-sm transition-all duration-300 hover:bg-bg-tertiary ${isActive(link.to)
+                                                ? 'text-accent-primary bg-accent-primary/10'
+                                                : 'text-text-secondary hover:text-text-primary'
+                                                }`}
+                                        >
+                                            <span className="mr-1">{link.icon}</span>
+                                            {link.label}
+                                        </Link>
+                                    ))}
                                 </div>
 
                                 <div className="h-6 w-px bg-card-border mx-2"></div>
@@ -133,22 +141,30 @@ const Navbar = () => {
 
             {/* Mobile Navigation */}
             {isMenuOpen && (
-                <div className="md:hidden bg-bg-secondary border-t border-card-border px-4 py-6 space-y-4 shadow-xl animate-fade-in-down">
+                <div className="md:hidden bg-bg-secondary border-t border-card-border px-4 py-6 space-y-2 shadow-xl animate-fade-in-down">
                     {/* Mobile Theme Switcher */}
-                    <div className="flex justify-between items-center px-4">
+                    <div className="flex justify-between items-center px-4 mb-4">
                         <span className="font-bold text-text-secondary uppercase text-xs tracking-widest">Theme</span>
                         <ThemeSwitcher />
                     </div>
 
                     {user ? (
                         <>
-                            <Link to="/" className="block py-3 px-4 font-bold text-text-primary hover:bg-bg-tertiary rounded-xl transition-all" onClick={() => setIsMenuOpen(false)}>Dashboard</Link>
-                            {isAdmin && (
-                                <>
-                                    <Link to="/create" className="block py-3 px-4 font-bold text-text-primary hover:bg-bg-tertiary rounded-xl transition-all" onClick={() => setIsMenuOpen(false)}>Create Event</Link>
-                                    <Link to="/problems" className="block py-3 px-4 font-bold text-text-primary hover:bg-bg-tertiary rounded-xl transition-all" onClick={() => setIsMenuOpen(false)}>Problem Studio</Link>
-                                </>
-                            )}
+                            {navLinks.map(link => (
+                                <Link
+                                    key={link.to}
+                                    to={link.to}
+                                    className={`block py-3 px-4 font-bold rounded-xl transition-all ${isActive(link.to)
+                                        ? 'text-accent-primary bg-accent-primary/10'
+                                        : 'text-text-primary hover:bg-bg-tertiary'
+                                        }`}
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    <span className="mr-2">{link.icon}</span>
+                                    {link.label}
+                                </Link>
+                            ))}
+
                             <div className="pt-4 border-t border-card-border">
                                 <Link to="/profile" className="flex items-center gap-3 px-4 py-3 hover:bg-bg-tertiary rounded-xl mb-2" onClick={() => setIsMenuOpen(false)}>
                                     <div className="w-8 h-8 rounded-full bg-accent-primary flex items-center justify-center text-white font-bold">
@@ -160,7 +176,7 @@ const Navbar = () => {
                                     onClick={() => { handleLogout(); setIsMenuOpen(false); }}
                                     className="w-full text-left py-3 px-4 font-bold text-status-error hover:bg-status-error/10 rounded-xl transition-all"
                                 >
-                                    Logout
+                                    🚪 Logout
                                 </button>
                             </div>
                         </>

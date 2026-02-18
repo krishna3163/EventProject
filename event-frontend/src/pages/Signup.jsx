@@ -196,14 +196,14 @@ const Signup = () => {
                             </div>
                         </div>
 
-                        <div className="pt-2 flex items-center gap-3 p-4 bg-accent-primary bg-opacity-10 rounded-2xl border border-accent-primary border-opacity-20">
-                            <div className="bg-accent-primary bg-opacity-20 p-2 rounded-xl">
-                                <svg className="w-5 h-5 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="pt-2 flex items-center gap-3 p-4 bg-accent-primary rounded-2xl border border-accent-primary border-opacity-30 shadow-lg">
+                            <div className="bg-white/20 p-2 rounded-xl">
+                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
-                            <p className="text-sm text-text-secondary font-medium">
-                                You'll be registered as a <strong className="text-accent-primary">Student</strong> and can participate in events and exams.
+                            <p className="text-sm text-white font-semibold">
+                                You'll be registered as a <strong className="text-yellow-200 font-black">Student</strong> and can participate in events and exams.
                             </p>
                         </div>
 
