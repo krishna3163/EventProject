@@ -27,10 +27,18 @@ const Login = () => {
         setIsLoading(true);
         try {
             await login(email, password);
+            toast.success('Login successful!');
             navigate('/');
         } catch (error) {
             console.error("Login error:", error);
-            toast.error(error.code || "Login failed");
+            const code = error?.code || '';
+            if (code === 'auth/user-not-found' || code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
+                toast.error('Invalid email/username or password');
+            } else if (code === 'auth/too-many-requests') {
+                toast.error('Too many attempts. Please try again later.');
+            } else {
+                toast.error(error?.message || 'Login failed. Please check your credentials.');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -40,9 +48,10 @@ const Login = () => {
         setIsLoading(true);
         try {
             await loginWithGoogle();
+            toast.success('Logged in with Google!');
             navigate('/');
         } catch (error) {
-            toast.error(error.message);
+            toast.error(error.message || 'Google login failed');
         } finally {
             setIsLoading(false);
         }
@@ -92,8 +101,8 @@ const Login = () => {
     };
 
     const handleQuickLogin = (type) => {
-        if (type === 'admin') setForm({ email: 'admin@eventhub.com', password: 'admin123' });
-        else if (type === 'student') setForm({ email: 'student@demo.com', password: 'student123' });
+        if (type === 'admin') setForm({ email: 'admin', password: 'admin123' });
+        else if (type === 'student') setForm({ email: 'student', password: 'student123' });
     };
 
     return (
@@ -113,23 +122,24 @@ const Login = () => {
                 {/* Quick Demos */}
                 <div className="flex gap-2 mb-6">
                     <button onClick={() => handleQuickLogin('admin')} className="flex-1 py-2 text-xs font-bold border border-accent-secondary text-accent-secondary bg-accent-secondary/5 rounded-lg hover:bg-accent-secondary/10 transition-all">
-                        🔐 Admin
+                        🔐 Admin Demo
                     </button>
                     <button onClick={() => handleQuickLogin('student')} className="flex-1 py-2 text-xs font-bold border border-accent-primary text-accent-primary bg-accent-primary/5 rounded-lg hover:bg-accent-primary/10 transition-all">
-                        🎓 Student
+                        🎓 Student Demo
                     </button>
                 </div>
 
-                {/* Email Form */}
+                {/* Email / Username Form */}
                 <form onSubmit={handleEmailLogin} className="space-y-4">
                     <div>
                         <input
-                            type="email"
+                            type="text"
                             name="email"
                             value={form.email}
                             onChange={handleChange}
                             className="input-field"
-                            placeholder="Email address"
+                            placeholder="Email or Username"
+                            autoComplete="username"
                             required
                         />
                     </div>
@@ -141,12 +151,21 @@ const Login = () => {
                             onChange={handleChange}
                             className="input-field"
                             placeholder="Password"
+                            autoComplete="current-password"
                             required
                         />
                         <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary">
                             {showPassword ? '🙈' : '👁️'}
                         </button>
                     </div>
+
+                    {/* Forgot Password Link */}
+                    <div className="text-right">
+                        <Link to="/forgot-password" className="text-sm text-accent-primary hover:underline font-medium">
+                            Forgot Password?
+                        </Link>
+                    </div>
+
                     <button type="submit" disabled={isLoading} className="w-full py-3 btn-primary disabled:opacity-70 disabled:cursor-not-allowed">
                         {isLoading ? 'Processing...' : 'Log In'}
                     </button>
@@ -160,7 +179,13 @@ const Login = () => {
                 {/* Social / Phone / Anon */}
                 <div className="space-y-3">
                     <button onClick={handleGoogleLogin} disabled={isLoading} className="w-full py-2.5 bg-bg-secondary border border-card-border text-text-primary font-bold rounded-xl hover:bg-bg-tertiary transition-all flex items-center justify-center gap-2">
-                        <span className="text-xl">🇬</span> Google
+                        <svg className="w-5 h-5" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                        </svg>
+                        Google
                     </button>
 
                     {!showOtpInput ? (
@@ -199,8 +224,8 @@ const Login = () => {
                 {/* Recaptcha container */}
                 <div id="recaptcha-container"></div>
 
-                <div className="mt-6 text-center">
-                    <Link to="/signup" className="text-accent-primary font-bold hover:underline text-sm">Create an Account</Link>
+                <div className="mt-6 text-center space-y-2">
+                    <Link to="/signup" className="text-accent-primary font-bold hover:underline text-sm block">Create an Account</Link>
                 </div>
             </div>
         </div>

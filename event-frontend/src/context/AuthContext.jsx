@@ -61,39 +61,51 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (emailOrUsername, password) => {
-        // â”€â”€ Try Firebase first (for real registered users) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        // Resolve shorthand demo names to emails
-        let email = emailOrUsername;
-        if (email.toLowerCase() === 'admin') email = 'admin@eventhub.com';
-        if (email.toLowerCase() === 'student') email = 'student@demo.com';
+        const isEmail = emailOrUsername.includes('@');
 
-        try {
-            // Firebase login path
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const token = await getIdToken(userCredential.user);
-            localStorage.setItem('token', token);
-
-            // Sync with MongoDB backend to get role and profile
-            const response = await apiService.user.getMe();
-            const userData = { ...response.data, uid: userCredential.user.uid };
-            setUser(userData);
-            localStorage.setItem('user', JSON.stringify(userData));
-            return userData;
-        } catch (firebaseError) {
-            // â”€â”€ Fallback: Custom JWT login (for seeded MongoDB-only accounts) â”€â”€
-            // e.g. admin/admin123, student/student123 seeded by DataInitializer
-            console.warn('Firebase login failed, trying custom JWT:', firebaseError.code);
+        // ── If it looks like an email, try Firebase first ──
+        if (isEmail) {
             try {
-                const response = await apiService.auth.login(emailOrUsername, password);
-                const { token, ...userData } = response.data;
+                const userCredential = await signInWithEmailAndPassword(auth, emailOrUsername, password);
+                const token = await getIdToken(userCredential.user);
                 localStorage.setItem('token', token);
+
+                // Sync with MongoDB backend to get role and profile
+                const response = await apiService.user.getMe();
+                const userData = { ...response.data, uid: userCredential.user.uid };
                 setUser(userData);
                 localStorage.setItem('user', JSON.stringify(userData));
                 return userData;
-            } catch (jwtError) {
-                // Both failed â€” throw the original Firebase error for better UX messaging
-                throw firebaseError;
+            } catch (firebaseError) {
+                // Firebase failed — try custom JWT as fallback
+                console.warn('Firebase login failed, trying custom JWT:', firebaseError.code);
+                try {
+                    const response = await apiService.auth.login(emailOrUsername, password);
+                    const { token, ...userData } = response.data;
+                    localStorage.setItem('token', token);
+                    setUser(userData);
+                    localStorage.setItem('user', JSON.stringify(userData));
+                    return userData;
+                } catch (jwtError) {
+                    // Both failed — throw Firebase error for better UX
+                    throw firebaseError;
+                }
             }
+        }
+
+        // ── Not an email (username like "admin") — go straight to custom JWT ──
+        try {
+            const response = await apiService.auth.login(emailOrUsername, password);
+            const { token, ...userData } = response.data;
+            localStorage.setItem('token', token);
+            setUser(userData);
+            localStorage.setItem('user', JSON.stringify(userData));
+            return userData;
+        } catch (jwtError) {
+            console.error('JWT login failed:', jwtError);
+            const err = new Error(jwtError?.response?.data?.message || jwtError?.response?.data?.error || 'Invalid username or password');
+            err.code = 'auth/invalid-credential';
+            throw err;
         }
     };
 

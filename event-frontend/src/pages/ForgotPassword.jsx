@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
@@ -9,11 +10,24 @@ const ForgotPassword = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!email) {
+            toast.error('Please enter your email address');
+            return;
+        }
         setIsLoading(true);
         try {
             await resetPassword(email);
+            // resetPassword in AuthContext already shows success toast
         } catch (error) {
             console.error(error);
+            const code = error?.code || '';
+            if (code === 'auth/user-not-found') {
+                toast.error('No account found with this email.');
+            } else if (code === 'auth/invalid-email') {
+                toast.error('Invalid email address.');
+            } else {
+                toast.error('Failed to send reset link. Try again.');
+            }
         } finally {
             setIsLoading(false);
         }

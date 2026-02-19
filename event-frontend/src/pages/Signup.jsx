@@ -48,6 +48,10 @@ const Signup = () => {
             toast.error('Password must be at least 6 characters');
             return;
         }
+        if (!studentForm.name.trim()) {
+            toast.error('Please enter your full name');
+            return;
+        }
         setIsLoading(true);
         try {
             await registerStudent({
@@ -57,9 +61,23 @@ const Signup = () => {
                 college: studentForm.college,
                 phone: studentForm.phone,
             });
+            toast.success('Account created successfully!');
             navigate('/');
         } catch (error) {
-            console.error(error);
+            console.error('Registration error:', error);
+            const code = error?.code || '';
+            const msg = error?.response?.data?.message || error?.response?.data?.error || error?.message || '';
+            if (code === 'auth/email-already-in-use' || msg.includes('already registered')) {
+                toast.error('This email is already registered. Try logging in instead.');
+            } else if (code === 'auth/weak-password') {
+                toast.error('Password is too weak. Use at least 6 characters.');
+            } else if (code === 'auth/invalid-email') {
+                toast.error('Please enter a valid email address.');
+            } else if (msg) {
+                toast.error(msg);
+            } else {
+                toast.error('Registration failed. Please try again.');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -89,9 +107,25 @@ const Signup = () => {
                 contactNumber: orgForm.contactNumber,
                 adminName: orgForm.adminName || orgForm.organizationName,
             });
+            toast.success('Organization registered successfully!');
             navigate('/');
         } catch (error) {
-            console.error(error);
+            console.error('Org registration error:', error);
+            const code = error?.code || '';
+            const msg = error?.response?.data?.message || error?.response?.data?.error || error?.message || '';
+            if (code === 'auth/email-already-in-use' || msg.includes('already registered')) {
+                toast.error('This email is already registered. Try logging in instead.');
+            } else if (msg.includes('username already taken')) {
+                toast.error('Organization username is already taken. Choose a different one.');
+            } else if (code === 'auth/weak-password') {
+                toast.error('Password is too weak. Use at least 6 characters.');
+            } else if (code === 'auth/invalid-email') {
+                toast.error('Please enter a valid email address.');
+            } else if (msg) {
+                toast.error(msg);
+            } else {
+                toast.error('Registration failed. Please try again.');
+            }
         } finally {
             setIsLoading(false);
         }
